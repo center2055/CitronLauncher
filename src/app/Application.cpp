@@ -517,6 +517,7 @@ void Application::checkForUpdates(bool manual) {
         auto body = http::get(kReleasesApi, 512 * 1024, token);
         std::optional<std::string> latest;
         std::optional<Error> error;
+        bool noRelease = false;
         if (body) {
             auto parsed = json::parse(*body);
             if (parsed) {
@@ -528,10 +529,13 @@ void Application::checkForUpdates(bool manual) {
             } else {
                 error = Error::make(ErrorCategory::Network, "update check", "The update information could not be read.", parsed.error());
             }
+        } else if (body.error().httpStatus == 404u) {
+            // nothing has been published yet, so the running build is the newest one
+            noRelease = true;
         } else {
             error = body.error();
         }
-        dispatcher_.post([this, manual, latest, error] {
+        dispatcher_.post([this, manual, latest, error, noRelease] {
             state_.updateCheckedAt = platform::unixNow();
             state_.settings.lastUpdateCheck = state_.updateCheckedAt;
             if (latest) {
@@ -552,6 +556,13 @@ void Application::checkForUpdates(bool manual) {
                 if (newer) {
                     showToast(std::vformat(strings().toastUpdate, std::make_wformat_args(state_.updateVersion)));
                 } else if (manual) {
+                    showToast(strings().toastUpToDate);
+                }
+            } else if (noRelease) {
+                state_.updateStatus = UpdateStatus::UpToDate;
+                state_.updateVersion.clear();
+                log::info("update check: no release published yet");
+                if (manual) {
                     showToast(strings().toastUpToDate);
                 }
             } else {

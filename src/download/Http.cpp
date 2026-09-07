@@ -92,6 +92,7 @@ Result<std::string> get(std::string_view url, std::uint64_t maxBytes, std::stop_
     WinHttpQueryHeaders(request.h, WINHTTP_QUERY_STATUS_CODE | WINHTTP_QUERY_FLAG_NUMBER, WINHTTP_HEADER_NAME_BY_INDEX, &status, &size, WINHTTP_NO_HEADER_INDEX);
     if (status != 200) {
         Error e = Error::make(ErrorCategory::Network, "http get", std::format("The server answered with status {}.", status), std::string(url));
+        e.httpStatus = status;
         e.retryable = status >= 500;
         return std::unexpected(e);
     }

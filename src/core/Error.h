@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <expected>
+#include <optional>
 #include <string>
 #include <string_view>
 
@@ -27,6 +28,7 @@ struct Error {
     std::string message;
     std::string detail;
     std::uint32_t code = 0;
+    std::optional<unsigned> httpStatus;
     bool retryable = false;
 
     static Error make(ErrorCategory category, std::string operation, std::string message, std::string detail = {}, bool retryable = false);
