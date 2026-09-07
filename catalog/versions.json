@@ -1,0 +1,614 @@
+{
+  "format": 1,
+  "updated": 1788730454,
+  "hosts": [
+    "assets1.xboxlive.com",
+    "assets2.xboxlive.com",
+    "xvcf1.xboxlive.com",
+    "xvcf2.xboxlive.com",
+    "d1.xboxlive.com",
+    "d2.xboxlive.com"
+  ],
+  "versions": [
+    {
+      "version": "1.26.60.21",
+      "channel": "preview",
+      "released": 1788374591,
+      "size": 2142892032,
+      "md5": "fb3e9b5bc32e1cda9a62b74cb903c226",
+      "path": "/Z/847dd1ec-63c3-4d62-bc52-9869a94c6e8a/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.26.6021.0.33e14b09-4990-4484-8726-cde80dad7aeb/Microsoft.MinecraftWindowsBeta_1.26.6021.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.50.27",
+      "channel": "preview",
+      "released": 1787677602,
+      "size": 2131599360,
+      "md5": "b946cc57cc344d9a3e70ee10bf9b13bd",
+      "path": "/Z/2d958585-77c7-411c-bac3-dac3e1d6bae4/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.26.5027.0.17615f0c-b7ed-42fa-b24e-1d9339eee1f4/Microsoft.MinecraftWindowsBeta_1.26.5027.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.50.26",
+      "channel": "preview",
+      "released": 1787072352,
+      "size": 2131595264,
+      "md5": "1fa5523b79b427c922ecf732514032d0",
+      "path": "/1/a925bd0b-2b43-4ee5-8627-6b01424db621/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.26.5026.0.db9f683a-2750-420f-9f4a-671779cf8e16/Microsoft.MinecraftWindowsBeta_1.26.5026.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.50.25",
+      "channel": "preview",
+      "released": 1786465032,
+      "size": 2130436096,
+      "md5": "70c109678dbcd836ee204f1a02d16c78",
+      "path": "/2/11f8409a-f5ad-45c8-b948-e9303038072b/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.26.5025.0.e34bda0f-58d9-438f-b880-d566784d0960/Microsoft.MinecraftWindowsBeta_1.26.5025.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.50.24",
+      "channel": "preview",
+      "released": 1785948920,
+      "size": 2119417856,
+      "md5": "a8d886b4fd2744f9c1b1c3e896c870b1",
+      "path": "/13/004d6e48-ccbd-48df-a84b-a7e0f9701d63/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.26.5024.0.03c4fb17-2396-469a-9332-a641028d55e1/Microsoft.MinecraftWindowsBeta_1.26.5024.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.50.22",
+      "channel": "preview",
+      "released": 1785257905,
+      "size": 2116042752,
+      "md5": "990436628facc1a80236b4ed7d68a182",
+      "path": "/6/f172ff25-7185-4237-96a1-ba5d2f76e4e8/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.26.5022.0.0a7be581-3f98-4a7e-8ea6-fd3bb21ff55d/Microsoft.MinecraftWindowsBeta_1.26.5022.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.50.20",
+      "channel": "preview",
+      "released": 1784652862,
+      "size": 2115203072,
+      "md5": "703e5b4e53dd3e9592aee7188e651903",
+      "path": "/4/2a7b3957-be08-4f41-8830-51ac401772ba/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.26.5020.0.a8c0f83b-1c78-4cb9-a5b4-a6a848545bac/Microsoft.MinecraftWindowsBeta_1.26.5020.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.45.01",
+      "channel": "release",
+      "released": 1787965083,
+      "size": 2490064896,
+      "md5": "a0f488255a72400d20ae2203656f308f",
+      "path": "/Z/8a3dfbab-b161-470f-8b42-c94f0b4f8f6f/7792d9ce-355a-493c-afbd-768f4a77c3b0/1.26.4501.0.8f39f343-cd87-4b76-8994-dc8310fc2f06/Microsoft.MinecraftUWP_1.26.4501.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.44.03",
+      "channel": "release",
+      "released": 1786730710,
+      "size": 2490064896,
+      "md5": "91a5abae9202d9746f5411a5fe4dfa97",
+      "path": "/Z/343b46e3-cf8d-4d07-b95d-97578788d4ff/7792d9ce-355a-493c-afbd-768f4a77c3b0/1.26.4403.0.c576ef1b-0106-4b07-82d9-441f5b2eb985/Microsoft.MinecraftUWP_1.26.4403.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.42.01",
+      "channel": "release",
+      "released": 1786217776,
+      "size": 2489954304,
+      "md5": "2896d795878490d0eb6ef725c0dcde8e",
+      "path": "/13/c385ae75-5cc0-4140-9b1f-7c24b8ec799b/7792d9ce-355a-493c-afbd-768f4a77c3b0/1.26.4201.0.4c345687-4f56-4eb5-b66f-4460f2f0fa62/Microsoft.MinecraftUWP_1.26.4201.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.40.31",
+      "channel": "preview",
+      "released": 1784046870,
+      "size": 2549854208,
+      "md5": "2a09745c992484da45bef545f1039a60",
+      "path": "/Z/226869fb-b691-4d44-bf42-e07a24fb9efb/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.26.4031.0.4b249979-15fc-47fa-96fa-53929cdc6267/Microsoft.MinecraftWindowsBeta_1.26.4031.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.40.30",
+      "channel": "preview",
+      "released": 1783446300,
+      "size": 2549854208,
+      "md5": "9f4b40e9404f1c79f3f030cb469b4f12",
+      "path": "/7/6de89d20-a43b-4b1d-9e7c-6e570e9e1f74/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.26.4030.0.0cb9011a-a256-459e-803f-c8c97ff2869c/Microsoft.MinecraftWindowsBeta_1.26.4030.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.40.27",
+      "channel": "preview",
+      "released": 1782235735,
+      "size": 2542702592,
+      "md5": "8b789a4f197bd3ec9dc919df3769d9d3",
+      "path": "/8/7c21123c-3eab-488e-9227-e61fd272a0f9/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.26.4027.0.29737025-1779-436b-a042-7b1bc46a05df/Microsoft.MinecraftWindowsBeta_1.26.4027.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.40.26",
+      "channel": "preview",
+      "released": 1781719425,
+      "size": 2524983296,
+      "md5": "ad3c52bae7bdf8089fc0691918019096",
+      "path": "/14/b971d9f7-85b2-4703-8495-f607b39ab2d2/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.26.4026.0.a5d7d68d-b235-45d9-a631-c4e9dab78a54/Microsoft.MinecraftWindowsBeta_1.26.4026.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.40.22",
+      "channel": "preview",
+      "released": 1781026862,
+      "size": 2417922048,
+      "md5": "0af35178d4c508847384bdbe86e35205",
+      "path": "/14/84273643-82d9-461c-97ec-92f42a785118/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.26.4022.0.d1afad30-ca3c-4d2f-94b5-ab05c898cb98/Microsoft.MinecraftWindowsBeta_1.26.4022.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.40.20",
+      "channel": "preview",
+      "released": 1780426873,
+      "size": 2244972544,
+      "md5": "95092c66a0bc6b5d71d4c8ad6a3f3ee0",
+      "path": "/6/a60447f4-1922-4e8f-8540-411000a6ef52/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.26.4020.0.b658fe3c-0983-44e2-bea3-231ab1384313/Microsoft.MinecraftWindowsBeta_1.26.4020.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.40.05",
+      "channel": "release",
+      "released": 1785860341,
+      "size": 2490257408,
+      "md5": "ed596f043f77a602f0067bb97ede8899",
+      "path": "/4/126a2a46-2f8e-407b-80f2-8560a63ce023/7792d9ce-355a-493c-afbd-768f4a77c3b0/1.26.4005.0.4c2b83a6-6147-4006-aa1b-1f494f17e026/Microsoft.MinecraftUWP_1.26.4005.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.33.01",
+      "channel": "release",
+      "released": 1783618311,
+      "size": 2209492992,
+      "md5": "11dad2ffbb1612650ef5449fdb6a91e6",
+      "path": "/10/1e7d62c3-960f-4386-81b1-1789edc683d1/7792d9ce-355a-493c-afbd-768f4a77c3b0/1.26.3301.0.2a4af946-1668-404e-8cc0-cb081f69103a/Microsoft.MinecraftUWP_1.26.3301.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.32.02",
+      "channel": "release",
+      "released": 1782408373,
+      "size": 2209492992,
+      "md5": "13c5c890c639f822348d871976bfa5f5",
+      "path": "/9/db5d4795-9b25-4cd1-989e-7024300cbe18/7792d9ce-355a-493c-afbd-768f4a77c3b0/1.26.3202.0.ec30be1b-5dc1-4b43-85a8-c717dcf363d9/Microsoft.MinecraftUWP_1.26.3202.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.31.01",
+      "channel": "release",
+      "released": 1781895781,
+      "size": 2209501184,
+      "md5": "ad911c23cdb735a44d775c13c3531aac",
+      "path": "/6/d449f74e-9ff0-4ea6-82e5-21fc53f8d40d/7792d9ce-355a-493c-afbd-768f4a77c3b0/1.26.3101.0.12b6a1df-e792-4168-b7ed-4ee580f26c7d/Microsoft.MinecraftUWP_1.26.3101.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.30.32",
+      "channel": "preview",
+      "released": 1779819929,
+      "size": 2260639744,
+      "md5": "fced02ad87c6c99ad441de4d681aeeae",
+      "path": "/8/21d722cf-ec80-4f01-b806-51e7f620fcec/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.26.3032.0.c6f09ba1-0569-4167-8349-27e9155949ad/Microsoft.MinecraftWindowsBeta_1.26.3032.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.30.29",
+      "channel": "preview",
+      "released": 1779213086,
+      "size": 2252918784,
+      "md5": "5e93e7906fd4e262df4b37f0ed8e4532",
+      "path": "/10/ef077752-be17-46ad-809f-fab7174a49a4/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.26.3029.0.38f295a8-df0a-4692-9d48-53af71dfccc0/Microsoft.MinecraftWindowsBeta_1.26.3029.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.30.28",
+      "channel": "preview",
+      "released": 1778606866,
+      "size": 2205331456,
+      "md5": "104675cf76ae27d60faaad743d4a8054",
+      "path": "/6/9382dd60-5f58-4738-8bc4-d0c2f128ea8b/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.26.3028.0.6948466a-9bff-4fa9-b2a4-be4c3f7fda02/Microsoft.MinecraftWindowsBeta_1.26.3028.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.30.27",
+      "channel": "preview",
+      "released": 1778086740,
+      "size": 2166984704,
+      "md5": "126a14512860a6817b01e7a7948b6ad0",
+      "path": "/12/e8a63b9f-cf11-4321-a555-f2f0c7608678/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.26.3027.0.24047402-b4a4-41c1-ad0f-7d7107fe9c81/Microsoft.MinecraftWindowsBeta_1.26.3027.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.30.25",
+      "channel": "preview",
+      "released": 1777566821,
+      "size": 2164187136,
+      "md5": "aec5db8a611e419ee4bbaa6e73cb0f84",
+      "path": "/11/1dcfebae-a93b-4f91-a04a-35ad02ea1c8e/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.26.3025.0.3137c69c-0310-47b9-adfe-8068008e2a32/Microsoft.MinecraftWindowsBeta_1.26.3025.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.30.20",
+      "channel": "preview",
+      "released": 1776788956,
+      "size": 2050121728,
+      "md5": "9e68e792a83ef04dcbec4939d5701d7a",
+      "path": "/1/c612bb96-0cb8-4855-a922-3e8771fdc863/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.26.3020.0.00b7c5c1-b6ba-46fc-a0d7-36afc4a9956c/Microsoft.MinecraftWindowsBeta_1.26.3020.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.30.05",
+      "channel": "release",
+      "released": 1781626545,
+      "size": 2209456128,
+      "md5": "b58b9b8d19ba0b5e65309a8fad741a14",
+      "path": "/12/480484ea-7b1c-4443-b152-411e07e1329d/7792d9ce-355a-493c-afbd-768f4a77c3b0/1.26.3005.0.48bff00d-cff7-4432-8d1e-662d92be1b14/Microsoft.MinecraftUWP_1.26.3005.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.21.01",
+      "channel": "release",
+      "released": 1778778960,
+      "size": 1924063232,
+      "md5": "463ec59ba177e156232b906fd5650a33",
+      "path": "/10/2e8b0dcb-b4db-43fa-b65e-115c50b2ecb9/7792d9ce-355a-493c-afbd-768f4a77c3b0/1.26.2101.0.a7c55ac8-a285-4f26-8c0c-42692fae7385/MICROSOFT.MINECRAFTUWP_1.26.2101.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.20.27",
+      "channel": "preview",
+      "released": 1776184184,
+      "size": 1992544256,
+      "md5": "f83fb35d9a66dadede198d76c0637de5",
+      "path": "/Z/4215e89e-22ab-4be3-9e37-0ed8ff10f265/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.26.2027.0.b190ee0d-e343-435a-b833-c6eddcb6c340/Microsoft.MinecraftWindowsBeta_1.26.2027.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.20.26",
+      "channel": "preview",
+      "released": 1775665676,
+      "size": 1992417280,
+      "md5": "f35b444f94df3b8732f174dbe6c3f2b9",
+      "path": "/14/effc0e3a-5070-468a-8212-733e7fb4bec5/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.26.2026.0.f5da1a06-3175-4b56-be3b-971d2f6ba90a/Microsoft.MinecraftWindowsBeta_1.26.2026.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.20.23",
+      "channel": "preview",
+      "released": 1774973925,
+      "size": 1990164480,
+      "md5": "79a7d1f4d6435a6821d5fb1727f470d3",
+      "path": "/3/cf17f409-bf46-48ca-9b2d-d7b82bcb0b4d/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.26.2023.0.f228e3b2-97f2-46af-aa2c-66830d53e828/Microsoft.MinecraftWindowsBeta_1.26.2023.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.20.22",
+      "channel": "preview",
+      "released": 1774456449,
+      "size": 2024947712,
+      "md5": "a9fc97c9be3c58868e4ded7e56d6f46b",
+      "path": "/7/fdcd1bc9-328c-46d8-82b6-013b032ee927/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.26.2022.0.3adf24eb-5003-4bc3-8475-6a3a4f228d04/Microsoft.MinecraftWindowsBeta_1.26.2022.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.20.21",
+      "channel": "preview",
+      "released": 1773764474,
+      "size": 1977016320,
+      "md5": "636167b24fa5db339891dbf6cd3b92bd",
+      "path": "/8/8b87fe8e-5634-4c87-bd34-0314e4e066b3/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.26.2021.0.b446899f-6b80-44da-b907-ce4f2ce089ab/Microsoft.MinecraftWindowsBeta_1.26.2021.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.20.20",
+      "channel": "preview",
+      "released": 1773159434,
+      "size": 1900019712,
+      "md5": "0756ade3f9b67ea14f61bc5718d7452a",
+      "path": "/Z/c8428042-5476-48ad-bf6d-46c76122d5ed/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.26.2020.0.d7b1b26a-ce59-4f6a-8ceb-e311b785a066/Microsoft.MinecraftWindowsBeta_1.26.2020.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.20.04",
+      "channel": "release",
+      "released": 1777997675,
+      "size": 1924014080,
+      "md5": "10c214dc667bf3d334eb82fd9f6ce5d0",
+      "path": "/2/86daedd1-ddc7-44ef-99a3-112e2ccceb27/7792d9ce-355a-493c-afbd-768f4a77c3b0/1.26.2004.0.3328906d-f8ed-4fc5-936d-a59522fe5e8f/MICROSOFT.MINECRAFTUWP_1.26.2004.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.13.01",
+      "channel": "release",
+      "released": 1775590126,
+      "size": 1803390976,
+      "md5": "b8c3bb7561e743980a3fd5ed93e2ec0f",
+      "path": "/4/3e8e0782-5c66-4d46-963e-f430fc88cd72/7792d9ce-355a-493c-afbd-768f4a77c3b0/1.26.1301.0.d7836dec-3a0f-48cd-b211-aeb7ec2b7cc3/MICROSOFT.MINECRAFTUWP_1.26.1301.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.12.02",
+      "channel": "release",
+      "released": 1775065223,
+      "size": 1803386880,
+      "md5": "8b62a806f69d1fa94ea31c5f38ee94ea",
+      "path": "/3/c6f987ba-e97d-4759-b001-86a1e905fde1/7792d9ce-355a-493c-afbd-768f4a77c3b0/1.26.1202.0.5d6372fb-8149-4d5c-96b8-1ad1a0f039f5/MICROSOFT.MINECRAFTUWP_1.26.1202.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.11.01",
+      "channel": "release",
+      "released": 1774634210,
+      "size": 1803407360,
+      "md5": "334a6896b349173c175eb7106d2a1c81",
+      "path": "/14/1ce08876-7829-4fe5-8f94-6e34636da6b8/7792d9ce-355a-493c-afbd-768f4a77c3b0/1.26.1101.0.fcbb70f6-904b-4da5-9236-30f4863c9bff/MICROSOFT.MINECRAFTUWP_1.26.1101.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.10.26",
+      "channel": "preview",
+      "released": 1772647198,
+      "size": 1843302400,
+      "md5": "f920f1b8ac76c1d2f4740e2d17f6c141",
+      "path": "/8/63eb397f-e60e-4851-b241-94029293ddeb/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.26.1026.0.f795f370-c349-455b-b332-57be7958dd39/Microsoft.MinecraftWindowsBeta_1.26.1026.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.10.25",
+      "channel": "preview",
+      "released": 1771955091,
+      "size": 1839603712,
+      "md5": "c17153d7d5c1326bf1cb95d89c6cb330",
+      "path": "/9/e7c6a085-9edb-4b1d-ab70-cafde689042b/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.26.1025.0.8ed6a550-c1df-4c76-b90c-275613125eb4/Microsoft.MinecraftWindowsBeta_1.26.1025.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.10.24",
+      "channel": "preview",
+      "released": 1771349800,
+      "size": 1825804288,
+      "md5": "2ebb78d498d510e1d445b6ba272dcf8a",
+      "path": "/12/dd9d78e3-de88-424d-85d4-cffccd48010b/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.26.1024.0.0061cdab-53a1-452d-8ee1-22b28b5cc13a/Microsoft.MinecraftWindowsBeta_1.26.1024.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.10.23",
+      "channel": "preview",
+      "released": 1770831272,
+      "size": 1822142464,
+      "md5": "58971f6b4c4d46eb6b4fb1d15a9725dc",
+      "path": "/14/661b2941-351d-48b2-b4d9-464feb557481/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.26.1023.0.6c998046-b308-4020-a651-592f6725d1ac/Microsoft.MinecraftWindowsBeta_1.26.1023.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.10.21",
+      "channel": "preview",
+      "released": 1770220409,
+      "size": 1823727616,
+      "md5": "3ee2f123a362b0f056397ca4253dce92",
+      "path": "/15/1d69a3cf-d0a8-4a38-ab32-8910f481b568/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.26.1021.0.e189f7d0-fa07-4ab1-9ecb-39f2f79ec6b0/Microsoft.MinecraftWindowsBeta_1.26.1021.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.10.20",
+      "channel": "preview",
+      "released": 1769535355,
+      "size": 1817706496,
+      "md5": "f289a536d7e8d9bb941fd771a366ebb4",
+      "path": "/5/30a64eba-581a-4b1f-acd6-ab303a27013d/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.26.1020.0.7e6df79b-3178-4b78-86ac-708d4c4b6bff/Microsoft.MinecraftWindowsBeta_1.26.1020.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.10.04",
+      "channel": "release",
+      "released": 1774369234,
+      "size": 1803366400,
+      "md5": "7e4d94673c98bea0f29168b8a8d4236e",
+      "path": "/12/925750b8-ef63-4a06-88de-d6c4235589b0/7792d9ce-355a-493c-afbd-768f4a77c3b0/1.26.1004.0.0c28a937-2f41-49ed-b641-a246abf8e0be/MICROSOFT.MINECRAFTUWP_1.26.1004.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.3.01",
+      "channel": "release",
+      "released": 1772473785,
+      "size": 1773248512,
+      "md5": "d957631857c3d2c6e23dcc1b101278c2",
+      "path": "/10/2ad96056-8398-4336-a406-38cc72765a4a/7792d9ce-355a-493c-afbd-768f4a77c3b0/1.26.301.0.2157d268-7f78-444c-9c38-00b1bd6c901c/MICROSOFT.MINECRAFTUWP_1.26.301.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.2.01",
+      "channel": "release",
+      "released": 1772050103,
+      "size": 1771028480,
+      "md5": "672652c501b8c193ddee25e15aa31ef6",
+      "path": "/1/d4026290-4784-446f-9823-8c46324b9a9c/7792d9ce-355a-493c-afbd-768f4a77c3b0/1.26.201.0.3b9636eb-65a6-4347-a8cd-29cb04fb6d64/MICROSOFT.MINECRAFTUWP_1.26.201.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.1.01",
+      "channel": "release",
+      "released": 1771526211,
+      "size": 1771024384,
+      "md5": "a39d3d3016efbd44f8f08e72d53b4bfb",
+      "path": "/5/818fd83b-d59c-4a16-a9ec-69035f29be7d/7792d9ce-355a-493c-afbd-768f4a77c3b0/1.26.101.0.aa0c35a7-1e86-440d-a49b-55309f7ff9f3/MICROSOFT.MINECRAFTUWP_1.26.101.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.0.29",
+      "channel": "preview",
+      "released": 1768930647,
+      "size": 1811316736,
+      "md5": "18a7aa4babb0832834555a2ba3da572d",
+      "path": "/4/ffb7672a-2ae3-4e7a-8fa1-9bc12bcea4db/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.26.29.0.41f2f0ae-9cd8-42cf-9e60-6f83d57cc0d3/Microsoft.MinecraftWindowsBeta_1.26.29.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.0.28",
+      "channel": "preview",
+      "released": 1768325638,
+      "size": 1811316736,
+      "md5": "528964ecf0fa2cc329aba5ded1b76a26",
+      "path": "/3/0a7b04ce-40f8-4abf-8a38-2b71c4a3d3f5/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.26.28.0.53c28bda-eb6d-47f7-a791-155c6bb27f68/Microsoft.MinecraftWindowsBeta_1.26.28.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.0.27",
+      "channel": "preview",
+      "released": 1767804032,
+      "size": 1810649088,
+      "md5": "31f02662131e374ffd0bc704fa98c53b",
+      "path": "/3/832b5f58-fff0-46d7-afe3-62f3eada2d33/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.26.27.0.219a6a4d-b5ae-42a4-a557-f8e6dd240acc/Microsoft.MinecraftWindowsBeta_1.26.27.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.0.26",
+      "channel": "preview",
+      "released": 1766047050,
+      "size": 1815007232,
+      "md5": "53106438adb98237b09ec2d0f54a2f6a",
+      "path": "/3/86bb7d70-546f-4445-bd74-56de82ebbc99/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.26.26.0.18a224cd-1246-4304-a83c-7f68190c7423/Microsoft.MinecraftWindowsBeta_1.26.26.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.0.25",
+      "channel": "preview",
+      "released": 1765387475,
+      "size": 1814757376,
+      "md5": "1f5b6a70e6e2d038af096abb9c47a60f",
+      "path": "/7/5cba9ea8-c8fe-4881-8c16-b512a92c3588/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.26.25.0.0a3996fe-521b-428f-b73f-c3fe5c11fd1e/Microsoft.MinecraftWindowsBeta_1.26.25.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.0.24",
+      "channel": "preview",
+      "released": 1764783053,
+      "size": 1812205568,
+      "md5": "3c6116a5ca7806d3f7de7ae1dde08432",
+      "path": "/15/b9cdebf8-52b9-4d9b-83c6-1e1ca6a15f4f/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.26.24.0.61bfaa7b-f7cd-4cad-bb6a-783c07c3f7c5/Microsoft.MinecraftWindowsBeta_1.26.24.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.26.0.02",
+      "channel": "release",
+      "released": 1770742865,
+      "size": 1771024384,
+      "md5": "0c620d717842fc3ba7069bfb62d54165",
+      "path": "/1/d107af1a-5006-4455-b71a-b7395465a0b9/7792d9ce-355a-493c-afbd-768f4a77c3b0/1.26.2.0.7b0bec04-ae0d-4136-82ec-29bb9751adc7/MICROSOFT.MINECRAFTUWP_1.26.2.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.21.132.01",
+      "channel": "release",
+      "released": 1767893662,
+      "size": 1767145472,
+      "md5": "ec7b5d1d8f3ad0a57b56032438adec8b",
+      "path": "/13/c59fd319-299a-40d1-bb2b-e6f1b96fb87a/7792d9ce-355a-493c-afbd-768f4a77c3b0/1.21.13201.0.47219e94-fffa-4fea-b27b-b9a133750594/MICROSOFT.MINECRAFTUWP_1.21.13201.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.21.131.01",
+      "channel": "release",
+      "released": 1766047050,
+      "size": 1767129088,
+      "md5": "2200e45813fcf53c3c64b3ee4d9a0bfa",
+      "path": "/8/78fd651c-c534-4c5b-9aeb-bcc845993203/7792d9ce-355a-493c-afbd-768f4a77c3b0/1.21.13101.0.cb540108-7a26-4ec7-81d6-5c29e54c323d/MICROSOFT.MINECRAFTUWP_1.21.13101.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.21.130.28",
+      "channel": "preview",
+      "released": 1763486763,
+      "size": 1808384000,
+      "md5": "6cc0e7ed28bdd9a91792b8054985a94f",
+      "path": "/3/c96c8f5e-eec0-41b3-b9d5-7a6e260e1ae1/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.21.13028.0.bb956973-67ec-4403-a7ff-451a3e2d0746/Microsoft.MinecraftWindowsBeta_1.21.13028.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.21.130.27",
+      "channel": "preview",
+      "released": 1762881885,
+      "size": 1807368192,
+      "md5": "2a1c40e454628b31ac3adb189538ba49",
+      "path": "/7/9bcb9729-a886-4ff0-8a1b-2ea27294bdc6/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.21.13027.0.4d3d7571-540b-4ebb-9968-a301639d6c0c/Microsoft.MinecraftWindowsBeta_1.21.13027.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.21.130.26",
+      "channel": "preview",
+      "released": 1762276954,
+      "size": 1805946880,
+      "md5": "61f99ff02728afe0d087951c8cc428b1",
+      "path": "/6/05fe140b-9d00-4bb0-9379-6060a7d87bbf/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.21.13026.0.e828de77-9716-42fe-81c5-a8449db51397/Microsoft.MinecraftWindowsBeta_1.21.13026.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.21.130.25",
+      "channel": "preview",
+      "released": 1761926415,
+      "size": 1789624320,
+      "md5": "53eada2976fcbfb44b054298e4c79913",
+      "path": "/6/64211bc6-0531-47af-a59b-a75b7494923e/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.21.13025.0.a9f5b019-e731-48c8-9da8-e19221c7d883/Microsoft.MinecraftWindowsBeta_1.21.13025.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.21.130.24",
+      "channel": "preview",
+      "released": 1761753615,
+      "size": 1789616128,
+      "md5": "d02c8bb9581b5fb22424ce71cbcabf2a",
+      "path": "/1/d92e34c0-657c-4961-982e-15e547d7f401/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.21.13024.0.5300c429-a5af-4d3e-878e-e52da402ff7a/Microsoft.MinecraftWindowsBeta_1.21.13024.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.21.130.22",
+      "channel": "preview",
+      "released": 1761148815,
+      "size": 1783451648,
+      "md5": "144d3b77577363894d44fd440d348807",
+      "path": "/3/9c302a78-01ec-4b9a-9d2e-bb845890deca/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.21.13022.0.45387b4a-baa2-4b8c-857f-e254e54c2cdb/Microsoft.MinecraftWindowsBeta_1.21.13022.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.21.130.20",
+      "channel": "preview",
+      "released": 1760457615,
+      "size": 1766559744,
+      "md5": "06e0d4d640167f8c07a7e2aaab55a55d",
+      "path": "/14/c6cf3fbf-1bcd-466c-89ad-815b1341c965/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.21.13020.0.93bb5ef3-9fc8-434c-a090-af8304a87bb9/Microsoft.MinecraftWindowsBeta_1.21.13020.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.21.130.04",
+      "channel": "release",
+      "released": 1765299646,
+      "size": 1767120896,
+      "md5": "e37370b38347818ef98e32a0828d4e8a",
+      "path": "/13/85f79956-c341-4ed5-a4b7-4a3eba7b4ef8/7792d9ce-355a-493c-afbd-768f4a77c3b0/1.21.13004.0.c5a9f4f8-403d-45da-a67e-e5c4b654cdb7/MICROSOFT.MINECRAFTUWP_1.21.13004.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.21.124.02",
+      "channel": "release",
+      "released": 1763744586,
+      "size": 1746071552,
+      "md5": "b9394824b04154b3ffa421159db1172d",
+      "path": "/5/94e39fde-e4b3-4b0c-9e4d-fc863879a8fa/7792d9ce-355a-493c-afbd-768f4a77c3b0/1.21.12402.0.d63d9c2d-45e3-4438-89fc-a823f8a2ef0f/MICROSOFT.MINECRAFTUWP_1.21.12402.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.21.123.02",
+      "channel": "release",
+      "released": 1763062967,
+      "size": 1746063360,
+      "md5": "ec24e82291cd218b446bccaa8fc63ab1",
+      "path": "/5/e7c3e87a-85c2-418c-80bf-24a8c18ef443/7792d9ce-355a-493c-afbd-768f4a77c3b0/1.21.12302.0.9652e398-729a-4268-bb97-f11894a52e59/MICROSOFT.MINECRAFTUWP_1.21.12302.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.21.122.01",
+      "channel": "release",
+      "released": 1762843327,
+      "size": 1746063360,
+      "md5": "f1f96c9ab83e0b1407ea9d9845e306eb",
+      "path": "/12/61b23c98-8461-4cd6-a537-863fa838948e/7792d9ce-355a-493c-afbd-768f4a77c3b0/1.21.12201.0.a08d9b9e-669e-4aab-a6d1-514bcd0a40cc/MICROSOFT.MINECRAFTUWP_1.21.12201.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.21.121.01",
+      "channel": "release",
+      "released": 1762396475,
+      "size": 1746059264,
+      "md5": "0c0b5df2b44bd24d105f22e2adf37c8a",
+      "path": "/15/7bf19a96-c045-4b55-b96e-faa32604781a/7792d9ce-355a-493c-afbd-768f4a77c3b0/1.21.12101.0.7590152e-2320-4e06-9e85-8e458890e1e7/MICROSOFT.MINECRAFTUWP_1.21.12101.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.21.120.25",
+      "channel": "preview",
+      "released": 1759852815,
+      "size": 1762906112,
+      "md5": "fc101790d23161978cedd43fac01c9a3",
+      "path": "/1/65893bb8-80db-4daa-800c-6cb274f4afab/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.21.12025.0.ec675b18-cd7d-4207-8d37-c164f7e4fc70/Microsoft.MinecraftWindowsBeta_1.21.12025.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.21.120.24",
+      "channel": "preview",
+      "released": 1759334415,
+      "size": 1761939456,
+      "md5": "6a9e31c6d60d6fddebfe9a1998f6b80c",
+      "path": "/1/b8827b40-998d-4b15-b73f-ff7d70ae1e9c/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.21.12024.0.b0ec0ab6-f9ab-41fa-b664-9091300e8f90/Microsoft.MinecraftWindowsBeta_1.21.12024.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.21.120.23",
+      "channel": "preview",
+      "released": 1758643215,
+      "size": 1754001408,
+      "md5": "13d7e750fd99f1b0a1b7f1a08e681f64",
+      "path": "/4/c21d7589-ffaf-4544-b1c5-926d72752e6c/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.21.12023.0.9f1b49ff-7011-4af2-bb8c-edc1de4b41df/Microsoft.MinecraftWindowsBeta_1.21.12023.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.21.120.22",
+      "channel": "preview",
+      "released": 1758038415,
+      "size": 1751461888,
+      "md5": "d21ff4f7937c9ad3f91711bba025cc6a",
+      "path": "/14/b058fc9d-ce41-4d43-86a3-97d8690ab0b4/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.21.12022.0.bd8e701d-78fe-44ae-bb25-f15ac0001754/Microsoft.MinecraftWindowsBeta_1.21.12022.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.21.120.21",
+      "channel": "preview",
+      "released": 1757433615,
+      "size": 1743065088,
+      "md5": "36b590a36446b1cfc677bd1fbfbed04d",
+      "path": "/12/66b02bc1-c4f1-4986-a183-c23e00cccecb/98bd2335-9b01-4e4c-bd05-ccc01614078b/1.21.12021.0.e5cfeb9c-2eaa-4959-8a49-e82cde29702a/Microsoft.MinecraftWindowsBeta_1.21.12021.0_x64__8wekyb3d8bbwe.msixvc"
+    },
+    {
+      "version": "1.21.120.04",
+      "channel": "release",
+      "released": 1761667200,
+      "size": 1746046976,
+      "md5": "d1a1c8526374596be545b046db3f6e47",
+      "path": "/1/7d219e7c-a46e-4afc-8176-cec808fc1e1b/7792d9ce-355a-493c-afbd-768f4a77c3b0/1.21.12004.0.0ed99274-787a-4d02-8344-7c6bd1ef77c8/MICROSOFT.MINECRAFTUWP_1.21.12004.0_x64__8wekyb3d8bbwe.msixvc"
+    }
+  ]
+}

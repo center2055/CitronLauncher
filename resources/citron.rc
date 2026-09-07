@@ -1,0 +1,40 @@
+#include <windows.h>
+#include "resource.h"
+#include "BuildInfo.h"
+
+IDI_CITRON ICON "icons/citron.ico"
+
+IDR_FONT_BODY RCDATA "fonts/HankenGrotesk.ttf"
+IDR_FONT_MONO RCDATA "fonts/JetBrainsMono.ttf"
+IDR_FONT_TITLE RCDATA "fonts/SchibstedGrotesk.ttf"
+IDR_CATALOG RCDATA "../catalog/versions.json"
+IDR_ICON_PNG RCDATA "icons/citron.png"
+
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION CITRON_VERSION_MAJOR, CITRON_VERSION_MINOR, CITRON_VERSION_PATCH, 0
+PRODUCTVERSION CITRON_VERSION_MAJOR, CITRON_VERSION_MINOR, CITRON_VERSION_PATCH, 0
+FILEFLAGSMASK VS_FFI_FILEFLAGSMASK
+FILEFLAGS 0
+FILEOS VOS_NT_WINDOWS32
+FILETYPE VFT_APP
+FILESUBTYPE VFT2_UNKNOWN
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "CompanyName", "Citron"
+            VALUE "FileDescription", "Citron Launcher"
+            VALUE "FileVersion", CITRON_VERSION_STRING
+            VALUE "InternalName", "Citron"
+            VALUE "LegalCopyright", "GPL-3.0"
+            VALUE "OriginalFilename", "Citron.exe"
+            VALUE "ProductName", "Citron Launcher"
+            VALUE "ProductVersion", CITRON_VERSION_STRING
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
