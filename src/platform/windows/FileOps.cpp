@@ -39,6 +39,30 @@ Result<void> removeFile(const std::filesystem::path& file) {
     return {};
 }
 
+// a package install path is a junction into the game library, and running
+// processes report the target, so both spellings have to be compared
+std::filesystem::path finalPath(const std::filesystem::path& path) {
+    if (path.empty()) {
+        return path;
+    }
+    HANDLE handle = CreateFileW(path.c_str(), 0, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr, OPEN_EXISTING,
+                                FILE_FLAG_BACKUP_SEMANTICS, nullptr);
+    if (handle == INVALID_HANDLE_VALUE) {
+        return path;
+    }
+    std::wstring buffer(1024, L'\0');
+    const DWORD length = GetFinalPathNameByHandleW(handle, buffer.data(), static_cast<DWORD>(buffer.size()), FILE_NAME_NORMALIZED | VOLUME_NAME_DOS);
+    CloseHandle(handle);
+    if (length == 0 || length >= buffer.size()) {
+        return path;
+    }
+    buffer.resize(length);
+    if (buffer.starts_with(L"\\\\?\\")) {
+        buffer.erase(0, 4);
+    }
+    return std::filesystem::path(std::move(buffer));
+}
+
 void discardFile(const std::filesystem::path& file) {
     DeleteFileW(file.c_str());
 }

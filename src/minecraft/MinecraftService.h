@@ -73,6 +73,7 @@ public:
 
     std::optional<VersionInfo> find(const VersionId& id) const;
     std::optional<VersionInfo> deployedFor(VersionChannel channel) const;
+    bool gameRunningOnChannel(VersionChannel channel) const;
 
     Result<void> setRoot(const paths::Layout& layout);
 

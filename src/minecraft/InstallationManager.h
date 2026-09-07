@@ -28,7 +28,7 @@ public:
     void setProgressSink(InstallProgressSink sink);
 
     bool install(const VersionId& id, const CatalogEntry& entry, std::vector<std::string> urls);
-    bool activate(const VersionId& id, std::filesystem::path package, std::optional<std::wstring> replaceFullName, ActivateDone done);
+    bool activate(const VersionId& id, std::filesystem::path package, std::optional<std::wstring> fallbackReplace, ActivateDone done);
     bool removeDeployment(const VersionId& id, std::wstring fullName, RemoveDone done);
     void cancel(const VersionId& id);
     bool busy(const VersionId& id) const;

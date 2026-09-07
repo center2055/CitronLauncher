@@ -6,6 +6,7 @@
 #include "download/DownloadMeta.h"
 #include "platform/windows/FileOps.h"
 #include "platform/windows/PackageManager.h"
+#include "platform/windows/Process.h"
 
 #include <algorithm>
 
@@ -57,6 +58,14 @@ std::optional<VersionInfo> MinecraftService::deployedFor(VersionChannel channel)
         }
     }
     return std::nullopt;
+}
+
+bool MinecraftService::gameRunningOnChannel(VersionChannel channel) const {
+    const auto current = deployedFor(channel);
+    if (!current || current->deployedLocation.empty()) {
+        return false;
+    }
+    return platform::anyProcessUnder(L"Minecraft.Windows.exe", current->deployedLocation);
 }
 
 void MinecraftService::notify() {
@@ -269,7 +278,7 @@ void MinecraftService::remove(const VersionId& id, std::function<void(Result<voi
         done(std::unexpected(Error::make(ErrorCategory::Internal, "remove", "This version is busy.")));
         return;
     }
-    if (info->deployed && LaunchManager::isGameRunning()) {
+    if (info->deployed && gameRunningOnChannel(id.channel)) {
         done(std::unexpected(Error::make(ErrorCategory::Launch, "remove", "Minecraft is running. Close it before removing this version.")));
         return;
     }
@@ -318,16 +327,16 @@ void MinecraftService::activate(const VersionId& id, bool keepPackage, std::func
         done(std::unexpected(Error::make(ErrorCategory::Internal, "activate", "This version is busy.")));
         return;
     }
-    if (LaunchManager::isGameRunning()) {
+    if (gameRunningOnChannel(id.channel)) {
         done(std::unexpected(Error::make(ErrorCategory::Launch, "activate", "Minecraft is running. Close it before switching versions.")));
         return;
     }
-    std::optional<std::wstring> replace;
+    std::optional<std::wstring> fallbackReplace;
     if (auto current = deployedFor(id.channel)) {
-        replace = current->deployedFullName;
+        fallbackReplace = current->deployedFullName;
     }
     const std::filesystem::path package = *info->packageFile;
-    installs_.activate(id, package, replace, [this, done, keepPackage, package](const VersionId& vid, Result<platform::InstalledPackage> result) {
+    installs_.activate(id, package, fallbackReplace, [this, done, keepPackage, package](const VersionId& vid, Result<platform::InstalledPackage> result) {
         if (result && !keepPackage) {
             log::info("discarding package file for {}", vid.key());
             if (auto removed = platform::removeFile(package); !removed) {

@@ -180,51 +180,51 @@ bool InstallationManager::install(const VersionId& id, const CatalogEntry& entry
     return downloads_.start(id, std::move(request), std::move(update), std::move(done));
 }
 
-bool InstallationManager::activate(const VersionId& id, std::filesystem::path package, std::optional<std::wstring> replaceFullName, ActivateDone done) {
+bool InstallationManager::activate(const VersionId& id, std::filesystem::path package, std::optional<std::wstring> fallbackReplace, ActivateDone done) {
     if (busy(id)) {
         return false;
     }
-    auto job = [this, id, package = std::move(package), replaceFullName = std::move(replaceFullName), done = std::move(done)](std::stop_token token) {
+    auto job = [this, id, package = std::move(package), fallbackReplace = std::move(fallbackReplace), done = std::move(done)](std::stop_token token) {
         InstallProgress p;
         p.stage = InstallStage::Deploying;
         p.total = 100;
         report(id, p);
         platform::initializeApartment();
 
-        if (replaceFullName) {
-            log::info("removing {} before deploying {}", text::toUtf8(*replaceFullName), id.key());
-            if (auto removed = platform::removePackage(*replaceFullName, token); !removed) {
-                p.stage = removed.error().isCancelled() ? InstallStage::Cancelled : InstallStage::Failed;
-                p.error = removed.error();
-                report(id, p);
-                finish(id);
-                if (done) {
-                    done(id, std::unexpected(removed.error()));
+        auto deploy = [&] {
+            Result<platform::InstalledPackage> outcome = std::unexpected(Error::make(ErrorCategory::Package, "deploy", "Minecraft could not be installed."));
+            for (int attempt = 1; attempt <= kDeployAttempts; ++attempt) {
+                if (token.stop_requested()) {
+                    return Result<platform::InstalledPackage>(std::unexpected(Error::cancelled("deploy")));
                 }
-                return;
+                log::info("deploying {} (attempt {})", id.key(), attempt);
+                outcome = platform::deployPackage(package, token, [&](int percent) {
+                    InstallProgress dp;
+                    dp.stage = InstallStage::Deploying;
+                    dp.done = static_cast<std::uint64_t>(percent);
+                    dp.total = 100;
+                    report(id, dp);
+                });
+                if (outcome || outcome.error().isCancelled() || !outcome.error().retryable) {
+                    break;
+                }
+                log::warn("deploy attempt {} failed: {}", attempt, outcome.error().summary());
+                std::this_thread::sleep_for(std::chrono::seconds(2));
             }
-            versions_.clearDeployRecord(id.channel);
-        }
+            return outcome;
+        };
 
-        Result<platform::InstalledPackage> result = std::unexpected(Error::make(ErrorCategory::Package, "deploy", "Minecraft could not be installed."));
-        for (int attempt = 1; attempt <= kDeployAttempts; ++attempt) {
-            if (token.stop_requested()) {
-                result = std::unexpected(Error::cancelled("deploy"));
-                break;
+        // windows replaces the installed version of a package family in place, so the
+        // previous one is only removed if that fails
+        Result<platform::InstalledPackage> result = deploy();
+        if (!result && !result.error().isCancelled() && fallbackReplace) {
+            log::warn("in place replacement failed, removing {} first: {}", text::toUtf8(*fallbackReplace), result.error().summary());
+            if (auto removed = platform::removePackage(*fallbackReplace, token); removed) {
+                versions_.clearDeployRecord(id.channel);
+                result = deploy();
+            } else if (!removed.error().isCancelled()) {
+                log::warn("previous version could not be removed: {}", removed.error().summary());
             }
-            log::info("deploying {} (attempt {})", id.key(), attempt);
-            result = platform::deployPackage(package, token, [&](int percent) {
-                InstallProgress dp;
-                dp.stage = InstallStage::Deploying;
-                dp.done = static_cast<std::uint64_t>(percent);
-                dp.total = 100;
-                report(id, dp);
-            });
-            if (result || result.error().isCancelled() || !result.error().retryable) {
-                break;
-            }
-            log::warn("deploy attempt {} failed: {}", attempt, result.error().summary());
-            std::this_thread::sleep_for(std::chrono::seconds(2));
         }
 
         if (!result) {

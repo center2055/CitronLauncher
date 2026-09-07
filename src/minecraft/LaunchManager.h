@@ -23,7 +23,6 @@ public:
 
     bool launch(VersionChannel channel, std::filesystem::path installLocation, LaunchMode mode, LaunchDone done);
     bool busy() const;
-    static bool isGameRunning();
 
 private:
     TaskScheduler& scheduler_;

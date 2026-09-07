@@ -64,7 +64,7 @@ Result<void> launchThroughHelper(VersionChannel channel, const std::filesystem::
         if (token.stop_requested()) {
             return std::unexpected(Error::cancelled("launch"));
         }
-        if (platform::anyProcessUnder(kGameExe, installLocation) || LaunchManager::isGameRunning()) {
+        if (platform::anyProcessUnder(kGameExe, installLocation)) {
             log::info("minecraft process detected");
             return {};
         }
@@ -77,10 +77,6 @@ Result<void> launchThroughHelper(VersionChannel channel, const std::filesystem::
 
 LaunchManager::LaunchManager(TaskScheduler& scheduler) : scheduler_(scheduler) {}
 
-bool LaunchManager::isGameRunning() {
-    return !platform::findProcesses(kGameExe).empty();
-}
-
 bool LaunchManager::busy() const {
     return operation_ && !operation_->done();
 }
@@ -91,7 +87,7 @@ bool LaunchManager::launch(VersionChannel channel, std::filesystem::path install
     }
     auto job = [channel, installLocation = std::move(installLocation), mode, done = std::move(done)](std::stop_token token) {
         platform::initializeApartment();
-        if (isGameRunning()) {
+        if (platform::anyProcessUnder(kGameExe, installLocation)) {
             done(std::unexpected(Error::make(ErrorCategory::Launch, "launch", "Minecraft is already running.")));
             return;
         }

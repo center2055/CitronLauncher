@@ -1,6 +1,7 @@
 #include "platform/windows/Process.h"
 
 #include "core/PathSafety.h"
+#include "platform/windows/FileOps.h"
 
 #include <tlhelp32.h>
 
@@ -70,8 +71,15 @@ bool isProcessAlive(DWORD pid) {
 }
 
 bool anyProcessUnder(std::wstring_view exeName, const std::filesystem::path& directory) {
+    if (directory.empty()) {
+        return false;
+    }
+    const std::filesystem::path resolved = finalPath(directory);
     for (const auto& process : findProcesses(exeName)) {
-        if (!process.path.empty() && pathsafety::isInside(directory, process.path)) {
+        if (process.path.empty()) {
+            continue;
+        }
+        if (pathsafety::isInside(directory, process.path) || pathsafety::isInside(resolved, process.path)) {
             return true;
         }
     }

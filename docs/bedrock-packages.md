@@ -35,10 +35,43 @@ Removal uses `RemovePackageAsync` with `PreserveRoamableApplicationData`.
 fails with 0x80073CFA on store signed ones. Game data lives in
 `%AppData%\Minecraft Bedrock` and is not part of the package either way.
 
-Windows keeps one registered package per family and user, so switching
-between versions of one channel always means remove and deploy. Deployed
-executables are not readable by the user account, which rules out copying a
-deployment into a loose folder.
+Windows keeps one registered package per family and user. Replacing the
+installed version is a single call: `AddPackageAsync` with
+`ForceUpdateFromAnyVersion` swaps the installed build in place, downgrades
+included, and keeps the game data. Measured here with a 2 GB package: first
+install 47 s, replacing it with an older build 12 s, applying the same build
+again 3 s. The previous version is therefore never removed first, only as a
+fallback when the in place replacement fails, so a failed install leaves the
+working version alone.
+
+## Why versions are not installed side by side
+
+Other launchers keep every version in its own folder and never call the
+package manager. That needs the package payload as loose files, which is not
+reachable without the content key. Measured on a 2 GB Preview package and a
+deployed Release install:
+
+- The payload is encrypted. The container header carries a null key id with
+  the encryption flag clear, and a scan of the whole file finds 13619 master
+  file table records and 215 directory indexes but not a single PE header.
+  The file system metadata is readable so the system can enumerate the
+  volume, the file contents are not. Decrypting them needs the key that comes
+  with the licence, which this project does not do.
+- A deployed install cannot be copied out either. Every file in the install
+  folder reads fine, 200 sampled files and all the DLLs included, except
+  `Minecraft.Windows.exe`, which is refused even though the access control
+  list grants the user read and execute. That one file is the licensed
+  asset and the refusal comes from below the file system.
+- An executable outside the package cannot borrow the identity of an
+  installed one. The desktop activator answers 0x800704C7 for a path outside
+  the package, so a loose copy could not sign in even if it existed.
+- Gaming Services tracks exactly one install root per title, and Windows
+  registers one package per family and user, so two builds of one channel
+  cannot be registered at the same time.
+
+Release and Preview are separate families with separate roots, so one build
+of each can be installed at once and work on one channel never disturbs the
+other. Citron treats a running game as blocking only for its own channel.
 
 ## Starting the game
 

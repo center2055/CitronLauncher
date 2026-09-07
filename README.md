@@ -38,8 +38,11 @@ error.
    `installers\`. A package that fails verification is discarded.
 4. Starting a version that is not the currently installed one for its channel
    deploys the package through `PackageManager`. Windows keeps one installed
-   package per channel, so this replaces the previous one. Packages kept in
-   `installers\` can be switched back without downloading again.
+   package per channel, so the installed build is replaced in place, which
+   keeps worlds and settings and leaves the old build alone if the install
+   fails. Packages kept in `installers\` can be switched back without
+   downloading again. Release and Preview are independent, so a Preview build
+   never touches a Release install.
 5. The game is started with its package identity from the launcher, which
    skips the store launch helper and its forced update to the newest version.
 
