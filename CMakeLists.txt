@@ -118,12 +118,27 @@ set_target_properties(CitronLauncher PROPERTIES OUTPUT_NAME "CitronLauncher")
 add_dependencies(CitronLauncher citron_buildinfo)
 target_include_directories(CitronLauncher PRIVATE resources)
 
-# Copy the bundled native components next to the executable.
+# Copy the bundled native components next to the executable. Only the listed
+# DLLs are copied. The source folder can also hold reverse engineering
+# databases, and copying the whole directory dragged those into every build
+# output, where a zipped build folder would have shipped them.
 set(CITRON_LAUNCHERCORE_DIR "${CMAKE_SOURCE_DIR}/third_party/launchercore")
+set(CITRON_LAUNCHERCORE_DLLS
+    launcher_core.dll
+    launcher_api.dll
+    libHttpClient.dll
+    vcruntime140.dll
+    vcruntime140_1.dll
+    msvcp140.dll
+    msvcp140_codecvt_ids.dll)
 if(EXISTS "${CITRON_LAUNCHERCORE_DIR}/launcher_core.dll")
+    set(citron_launchercore_paths "")
+    foreach(dll IN LISTS CITRON_LAUNCHERCORE_DLLS)
+        list(APPEND citron_launchercore_paths "${CITRON_LAUNCHERCORE_DIR}/${dll}")
+    endforeach()
     add_custom_command(TARGET CitronLauncher POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:CitronLauncher>/native/launchercore"
-        COMMAND ${CMAKE_COMMAND} -E copy_directory "${CITRON_LAUNCHERCORE_DIR}" "$<TARGET_FILE_DIR:CitronLauncher>/native/launchercore")
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${citron_launchercore_paths} "$<TARGET_FILE_DIR:CitronLauncher>/native/launchercore")
 endif()
 
 target_compile_options(citron_core PUBLIC $<$<CONFIG:Release>:/O2 /GL /Gy /Gw /Oi>)
