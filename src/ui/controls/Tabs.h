@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ui/Animation.h"
 #include "ui/controls/Element.h"
 
 #include <functional>
@@ -39,6 +40,7 @@ private:
     TabsKind kind_;
     std::vector<std::wstring> labels_;
     std::vector<Rect> rects_;
+    std::vector<Animated> active_;
     std::function<void(int)> onSelect_;
     int selected_ = 0;
     int hover_ = -1;

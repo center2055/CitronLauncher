@@ -21,15 +21,14 @@ struct PageActions {
     std::function<void(VersionFilter)> filter;
     std::function<void(const std::string&)> setLanguage;
     std::function<void(bool)> setCloseOnLaunch;
-    std::function<void(bool)> setKeepInstallers;
     std::function<void(bool)> setCheckUpdates;
     std::function<void()> browseRoot;
     std::function<void()> applyRoot;
     std::function<void()> resetRoot;
     std::function<void()> checkUpdates;
     std::function<void()> openGithub;
-    std::function<void()> openWebsite;
-    std::function<void()> openLicenses;
+    std::function<void()> openDiscord;
+    std::function<void()> openKofi;
     std::function<void()> openStore;
 };
 

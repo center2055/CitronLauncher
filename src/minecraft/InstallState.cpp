@@ -11,7 +11,9 @@ std::string_view stageName(InstallStage stage) {
     case InstallStage::Downloading: return "downloading";
     case InstallStage::Verifying: return "verifying";
     case InstallStage::Finalizing: return "finalizing";
-    case InstallStage::Deploying: return "deploying";
+    case InstallStage::Downloaded: return "downloaded";
+    case InstallStage::Extracting: return "extracting";
+    case InstallStage::Removing: return "removing";
     case InstallStage::Completed: return "completed";
     case InstallStage::Failed: return "failed";
     case InstallStage::Cancelled: return "cancelled";
@@ -20,7 +22,7 @@ std::string_view stageName(InstallStage stage) {
 }
 
 bool isTerminal(InstallStage stage) {
-    return stage == InstallStage::Completed || stage == InstallStage::Failed || stage == InstallStage::Cancelled;
+    return stage == InstallStage::Downloaded || stage == InstallStage::Completed || stage == InstallStage::Failed || stage == InstallStage::Cancelled;
 }
 
 bool isBusy(InstallStage stage) {
@@ -38,12 +40,13 @@ bool canTransition(InstallStage from, InstallStage to) {
         return from != InstallStage::Idle;
     }
     switch (from) {
-    case InstallStage::Idle: return to == InstallStage::Resolving || to == InstallStage::Deploying;
+    case InstallStage::Idle: return to == InstallStage::Resolving || to == InstallStage::Removing;
     case InstallStage::Resolving: return to == InstallStage::Downloading || to == InstallStage::Verifying;
     case InstallStage::Downloading: return to == InstallStage::Verifying;
-    case InstallStage::Verifying: return to == InstallStage::Finalizing;
-    case InstallStage::Finalizing: return to == InstallStage::Completed || to == InstallStage::Deploying;
-    case InstallStage::Deploying: return to == InstallStage::Completed;
+    case InstallStage::Verifying: return to == InstallStage::Finalizing || to == InstallStage::Extracting;
+    case InstallStage::Finalizing: return to == InstallStage::Downloaded || to == InstallStage::Extracting || to == InstallStage::Completed;
+    case InstallStage::Extracting: return to == InstallStage::Completed;
+    case InstallStage::Removing: return to == InstallStage::Idle;
     default: return false;
     }
 }

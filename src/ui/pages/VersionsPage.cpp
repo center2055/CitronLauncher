@@ -69,7 +69,13 @@ public:
         const bool failed = p.stage == InstallStage::Failed;
         statusColor_ = StatusColor::Dim;
         bar_->setVisible(false);
-        if (busy) {
+        // deleting walks the whole install and reports no measurable progress,
+        // so the row shows a label without a bar and offers nothing to cancel
+        const bool removing = p.stage == InstallStage::Removing;
+        if (removing) {
+            statusColor_ = StatusColor::Warn;
+            status_ = strings.statusRemoving;
+        } else if (busy) {
             bar_->setVisible(true);
             bar_->setFraction(static_cast<float>(p.fraction()));
             bar_->setError(false);
@@ -78,8 +84,8 @@ public:
                 status_ = std::format(L"{} {}", strings.statusDownloading, text::toWide(format::percent(p.fraction())));
             } else if (p.stage == InstallStage::Verifying) {
                 status_ = strings.statusVerifying;
-            } else if (p.stage == InstallStage::Deploying) {
-                status_ = std::format(L"{} {}", strings.statusInstalling, text::toWide(format::percent(p.fraction())));
+            } else if (p.stage == InstallStage::Extracting) {
+                status_ = std::format(L"{} {}", strings.statusExtracting, text::toWide(format::percent(p.fraction())));
             } else {
                 status_ = strings.statusDownloading;
             }
@@ -98,23 +104,25 @@ public:
         } else if (row.installed) {
             status_ = strings.statusInstalled;
             statusColor_ = StatusColor::Accent;
+        } else if (row.downloaded) {
+            status_ = strings.statusDownloaded;
         } else if (!row.inCatalog) {
             status_ = strings.statusUnavailable;
         } else {
             status_ = strings.statusNotDownloaded;
         }
-        download_->setLabel(strings.download);
+        download_->setLabel(row.downloaded ? strings.install : strings.download);
         cancel_->setLabel(strings.cancel);
         remove_->setLabel(armed ? strings.confirmRemove : strings.remove);
         remove_->setArmed(armed);
         retry_->setLabel(strings.retry);
         dismiss_->setLabel(strings.dismiss);
         download_->setVisible(!busy && !failed && !row.installed && row.inCatalog);
-        cancel_->setVisible(busy && p.stage != InstallStage::Deploying);
-        remove_->setVisible(!busy && !failed && row.installed);
+        cancel_->setVisible(busy && !removing);
+        remove_->setVisible(!busy && !failed && (row.installed || row.downloaded));
         retry_->setVisible(failed && row.inCatalog);
         dismiss_->setVisible(failed);
-        setDimmed(!row.inCatalog && !row.installed);
+        setDimmed(!row.inCatalog && !row.installed && !row.downloaded);
         invalidate();
     }
 
@@ -147,7 +155,6 @@ protected:
     void renderContent(RenderContext& ctx) override {
         const Theme& t = ctx.theme;
         const Rect c = contentRect();
-        ctx.r.fillRect({c.x, c.y + (c.h - 20.0f) / 2.0f, 3.0f, 20.0f}, selected() && installed_ ? t.accent : Color::transparent(), 2.0f);
         const TextStyle versionStyle{Font::Mono, 14.0f, 600, 0.0f};
         const TextStyle tagStyle{Font::Body, 11.0f, 700, 0.44f};
         const TextStyle sizeStyle{Font::Body, 12.0f, 400, 0.0f};
@@ -243,6 +250,17 @@ void VersionsPage::update(const AppState& state, const Strings& strings) {
     refresh_->setTooltip(strings.refresh);
     filters_->setLabels({strings.filterAll, strings.filterRelease, strings.filterPreview, strings.filterInstalled});
     filters_->setSelected(static_cast<int>(state.filter));
+    if (state.filter != lastFilter_) {
+        // slide in from the side the selection moved toward, so the switch reads
+        // as motion rather than a plain fade
+        slideFrom_ = static_cast<int>(state.filter) > static_cast<int>(lastFilter_) ? 24.0f : -24.0f;
+        lastFilter_ = state.filter;
+        listFade_.jump(0.0f);
+        listFade_.set(1.0f);
+        if (host_ != nullptr) {
+            host_->requestFrame();
+        }
+    }
 
     const auto visible = state.visibleRows();
     const bool narrow = bounds_.w < 800.0f;
@@ -298,7 +316,29 @@ void VersionsPage::render(RenderContext& ctx) {
     drawIcon(ctx.r, Icon::Search, {searchBox_.x + 12.0f, searchBox_.y + (38.0f - 16.0f) / 2.0f, 16.0f, 16.0f}, t.textMute, 2.0f);
     const Rect fb = filters_->bounds();
     ctx.r.fillRect({column_.x + 16.0f, fb.bottom() - 1.0f, column_.w - 32.0f, 1.0f}, t.hairline);
-    Element::render(ctx);
+    if (listFade_.step(ctx.now) && host_ != nullptr) {
+        host_->requestFrame();
+    }
+    for (const auto& child : children()) {
+        if (!child->visible() || child.get() == static_cast<Element*>(scroll_)) {
+            continue;
+        }
+        child->render(ctx);
+    }
+    if (scroll_->visible()) {
+        const float listOpacity = listFade_.value();
+        if (listOpacity >= 0.999f) {
+            scroll_->render(ctx);
+        } else {
+            // the opacity layer is pushed untransformed so it clips the sliding
+            // content to the list viewport
+            ctx.r.pushOpacity(scroll_->bounds(), listOpacity);
+            ctx.r.pushTransform(slideFrom_ * (1.0f - listOpacity), 0.0f);
+            scroll_->render(ctx);
+            ctx.r.popTransform();
+            ctx.r.popOpacity();
+        }
+    }
     if (empty_) {
         const Rect area = scroll_->bounds();
         ctx.r.drawText(emptyText_, {Font::Body, 14.0f, 400, 0.0f}, {area.x, area.y + 40.0f, area.w, 20.0f}, t.textDim, {Align::Center, Align::Center, true, false});

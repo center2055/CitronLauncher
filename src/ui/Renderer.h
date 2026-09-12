@@ -15,6 +15,7 @@
 #include <span>
 #include <string_view>
 #include <tuple>
+#include <vector>
 
 namespace citron::ui {
 
@@ -72,6 +73,8 @@ public:
     void popClip();
     void pushOpacity(const Rect& rect, float opacity);
     void popOpacity();
+    void pushTransform(float dx, float dy);
+    void popTransform();
     void fillGeometry(ID2D1Geometry* geometry, Color color, const D2D1_MATRIX_3X2_F& transform);
     void strokeGeometry(ID2D1Geometry* geometry, Color color, float width, const D2D1_MATRIX_3X2_F& transform, bool roundCaps = true);
     void drawBitmap(ID2D1Bitmap* bitmap, const Rect& dest, float opacity = 1.0f, float radius = 0.0f);
@@ -119,6 +122,7 @@ private:
     winrt::com_ptr<IDWriteFontCollection1> fonts_;
     winrt::com_ptr<IDWriteInMemoryFontFileLoader> fontLoader_;
     winrt::com_ptr<IDWriteFontSet> fontSet_;
+    std::vector<D2D1_MATRIX_3X2_F> transforms_;
     std::map<std::tuple<int, int, int>, winrt::com_ptr<IDWriteTextFormat3>> formats_;
     std::map<std::tuple<int, int, int>, winrt::com_ptr<IDWriteInlineObject>> ellipsis_;
 };

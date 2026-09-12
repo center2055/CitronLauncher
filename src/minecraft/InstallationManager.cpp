@@ -14,13 +14,16 @@ namespace citron {
 
 namespace {
 
-constexpr int kDeployAttempts = 3;
 constexpr std::uint64_t kSpareBytes = 512ull * 1024 * 1024;
+
+std::uint64_t saturatedAdd(std::uint64_t a, std::uint64_t b) {
+    return a > UINT64_MAX - b ? UINT64_MAX : a + b;
+}
 
 }
 
 InstallationManager::InstallationManager(VersionManager& versions, TaskScheduler& scheduler, DownloadManager& downloads)
-    : versions_(versions), scheduler_(scheduler), downloads_(downloads) {}
+    : versions_(versions), scheduler_(scheduler), downloads_(downloads), extractor_(std::make_unique<LauncherCoreGdkExtractor>()) {}
 
 void InstallationManager::setProgressSink(InstallProgressSink sink) {
     std::lock_guard lock(mutex_);
@@ -41,6 +44,116 @@ void InstallationManager::report(const VersionId& id, const InstallProgress& pro
 void InstallationManager::finish(const VersionId& id) {
     std::lock_guard lock(mutex_);
     operations_.erase(id);
+}
+
+void InstallationManager::extractVerifiedPackage(const VersionId& id, const CatalogEntry& entry, const std::filesystem::path& package, std::stop_token token) {
+    const auto destination = versions_.managedPath(id);
+    const auto staging = versions_.stagingPath(id);
+    InstallProgress p;
+    p.stage = InstallStage::Extracting;
+    p.total = 1;
+    report(id, p);
+
+    if (!pathsafety::isInside(versions_.layout().versions, destination) || !pathsafety::isInside(versions_.layout().versions, staging)) {
+        p.stage = InstallStage::Failed;
+        p.error = Error::make(ErrorCategory::Filesystem, "extract", "The version extraction location is outside the launcher folder.");
+        report(id, p);
+        finish(id);
+        return;
+    }
+    std::error_code ec;
+    if (std::filesystem::exists(destination, ec)) {
+        p.stage = InstallStage::Failed;
+        p.error = Error::make(ErrorCategory::Filesystem, "extract", "This version already has an incomplete installation directory.",
+                              destination.string(), true);
+        report(id, p);
+        finish(id);
+        return;
+    }
+    if (auto removed = platform::removeDirectoryTree(staging); !removed) {
+        p.stage = InstallStage::Failed;
+        p.error = removed.error();
+        report(id, p);
+        finish(id);
+        return;
+    }
+    std::filesystem::create_directories(staging, ec);
+    if (ec) {
+        p.stage = InstallStage::Failed;
+        p.error = Error::fromWin32(ErrorCategory::Filesystem, "create extraction directory", static_cast<unsigned long>(ec.value()),
+                                   "Citron could not create the version staging directory.");
+        report(id, p);
+        finish(id);
+        return;
+    }
+
+    log::info("extracting {} into {}", id.key(), staging.string());
+    const auto nativeDirectory = versions_.layout().root / L"native" / L"launchercore";
+    auto extracted = extractor_->extract(package, staging, nativeDirectory, [this, id](std::uint64_t current, std::uint64_t total) {
+        InstallProgress progress;
+        progress.stage = InstallStage::Extracting;
+        progress.done = current;
+        progress.total = total;
+        report(id, progress);
+    }, token);
+    if (!extracted) {
+        static_cast<void>(platform::removeDirectoryTree(staging));
+        p.stage = extracted.error().isCancelled() ? InstallStage::Cancelled : InstallStage::Failed;
+        p.error = extracted.error();
+        report(id, p);
+        finish(id);
+        return;
+    }
+    if (token.stop_requested()) {
+        static_cast<void>(platform::removeDirectoryTree(staging));
+        p.stage = InstallStage::Cancelled;
+        p.error = Error::cancelled("extract");
+        report(id, p);
+        finish(id);
+        return;
+    }
+    platform::initializeApartment();
+    if (auto prepared = versions_.prepareManagedInstallation(id, staging, token); !prepared) {
+        static_cast<void>(platform::removeDirectoryTree(staging));
+        p.stage = prepared.error().isCancelled() ? InstallStage::Cancelled : InstallStage::Failed;
+        p.error = prepared.error();
+        report(id, p);
+        finish(id);
+        return;
+    }
+    if (!versions_.isCompleteManagedInstallation(staging)) {
+        static_cast<void>(platform::removeDirectoryTree(staging));
+        p.stage = InstallStage::Failed;
+        p.error = Error::make(ErrorCategory::Package, "validate extraction", "The extracted version is incomplete.",
+                              "Citron could not finish provisioning the required GDK runtime files or launcher manifest.", true);
+        report(id, p);
+        finish(id);
+        return;
+    }
+    if (auto metadata = versions_.writeManagedMetadata(id, staging, entry.md5); !metadata) {
+        static_cast<void>(platform::removeDirectoryTree(staging));
+        p.stage = InstallStage::Failed;
+        p.error = metadata.error();
+        report(id, p);
+        finish(id);
+        return;
+    }
+    if (auto promoted = platform::moveDirectory(staging, destination); !promoted) {
+        static_cast<void>(platform::removeDirectoryTree(staging));
+        p.stage = InstallStage::Failed;
+        p.error = promoted.error();
+        report(id, p);
+        finish(id);
+        return;
+    }
+    if (auto removed = platform::removeFile(package); !removed) {
+        log::warn("verified package cache could not be removed after extracting {}: {}", id.key(), removed.error().summary());
+    }
+    p.stage = InstallStage::Completed;
+    p.done = 1;
+    p.total = 1;
+    report(id, p);
+    finish(id);
 }
 
 bool InstallationManager::busy(const VersionId& id) const {
@@ -79,20 +192,23 @@ bool InstallationManager::install(const VersionId& id, const CatalogEntry& entry
     }
     const auto partial = versions_.partialPath(id);
     const auto target = versions_.packagePath(id);
-    if (!pathsafety::isInside(versions_.layout().root, partial) || !pathsafety::isInside(versions_.layout().root, target)) {
+    if (!pathsafety::isInside(versions_.layout().root, partial) || !pathsafety::isInside(versions_.layout().root, target) ||
+        !pathsafety::isInside(versions_.layout().versions, versions_.managedPath(id))) {
         InstallProgress p;
         p.stage = InstallStage::Failed;
         p.error = Error::make(ErrorCategory::Filesystem, "install", "The download location is outside the launcher folder.");
         report(id, p);
         return false;
     }
+    const bool cachedPackage = platform::fileExists(target);
     if (const auto free = platform::freeSpace(versions_.layout().root)) {
         const std::uint64_t have = platform::fileSize(partial).value_or(0);
-        if (*free + have < entry.size + kSpareBytes) {
+        const std::uint64_t required = saturatedAdd(entry.size, kSpareBytes);
+        if (saturatedAdd(*free, have) < required) {
             InstallProgress p;
             p.stage = InstallStage::Failed;
             p.error = Error::make(ErrorCategory::Filesystem, "install", "There is not enough free disk space for this version.",
-                                  "free " + std::to_string(*free / (1024 * 1024)) + " MB, needed " + std::to_string((entry.size + kSpareBytes) / (1024 * 1024)) + " MB");
+                                  "free " + std::to_string(*free / (1024 * 1024)) + " MB, needed " + std::to_string(required / (1024 * 1024)) + " MB");
             report(id, p);
             return false;
         }
@@ -102,6 +218,15 @@ bool InstallationManager::install(const VersionId& id, const CatalogEntry& entry
     starting.stage = InstallStage::Resolving;
     starting.total = entry.size;
     report(id, starting);
+
+    // second press: the verified package is already in the installer cache, so extract it into an isolated version.
+    if (cachedPackage) {
+        std::lock_guard lock(mutex_);
+        operations_[id] = scheduler_.start("install " + id.key(), [this, id, entry, target](std::stop_token token) {
+            verifyAndExtract(id, entry, target, token);
+        });
+        return true;
+    }
 
     DownloadRequest request;
     request.urls = std::move(urls);
@@ -127,132 +252,87 @@ bool InstallationManager::install(const VersionId& id, const CatalogEntry& entry
             report(vid, p);
             return;
         }
-        auto job = [this, vid, entry, partial, target](std::stop_token token) {
-            InstallProgress p;
-            p.stage = InstallStage::Verifying;
-            p.total = entry.size;
-            report(vid, p);
-            log::info("verifying {}", vid.key());
-            auto hash = platform::md5OfFile(partial, token, [&](std::uint64_t done, std::uint64_t total) {
-                InstallProgress hp;
-                hp.stage = InstallStage::Verifying;
-                hp.done = done;
-                hp.total = total;
-                report(vid, hp);
-            });
-            if (!hash) {
-                p.stage = hash.error().isCancelled() ? InstallStage::Cancelled : InstallStage::Failed;
-                p.error = hash.error();
-                report(vid, p);
-                finish(vid);
-                return;
-            }
-            if (!text::equalsIgnoreCase(*hash, entry.md5)) {
-                log::error("checksum mismatch for {}: expected {} got {}", vid.key(), entry.md5, *hash);
-                platform::discardFile(partial);
-                removeDownloadMeta(partial);
-                p.stage = InstallStage::Failed;
-                p.error = Error::make(ErrorCategory::Download, "verify", "The downloaded package is damaged (checksum mismatch).", *hash, true);
-                report(vid, p);
-                finish(vid);
-                return;
-            }
-            p.stage = InstallStage::Finalizing;
-            p.done = entry.size;
-            report(vid, p);
-            if (auto moved = platform::moveReplace(partial, target); !moved) {
-                p.stage = InstallStage::Failed;
-                p.error = moved.error();
-                report(vid, p);
-                finish(vid);
-                return;
-            }
-            removeDownloadMeta(partial);
-            log::info("installed package {} at {}", vid.key(), target.string());
-            p.stage = InstallStage::Completed;
-            report(vid, p);
-            finish(vid);
-        };
         std::lock_guard lock(mutex_);
-        operations_[vid] = scheduler_.start("verify " + vid.key(), std::move(job));
+        operations_[vid] = scheduler_.start("verify " + vid.key(), [this, vid, entry, partial, target](std::stop_token token) {
+            verifyDownload(vid, entry, partial, target, token);
+        });
     };
 
     return downloads_.start(id, std::move(request), std::move(update), std::move(done));
 }
 
-bool InstallationManager::activate(const VersionId& id, std::filesystem::path package, std::optional<std::wstring> fallbackReplace, ActivateDone done) {
-    if (busy(id)) {
-        return false;
+Result<void> InstallationManager::verifyChecksum(const VersionId& id, const CatalogEntry& entry, const std::filesystem::path& source, std::stop_token token) {
+    InstallProgress p;
+    p.stage = InstallStage::Verifying;
+    p.total = entry.size;
+    report(id, p);
+    log::info("verifying {}", id.key());
+    auto hash = platform::md5OfFile(source, token, [this, &id](std::uint64_t done, std::uint64_t total) {
+        InstallProgress hp;
+        hp.stage = InstallStage::Verifying;
+        hp.done = done;
+        hp.total = total;
+        report(id, hp);
+    });
+    if (!hash) {
+        return std::unexpected(hash.error());
     }
-    auto job = [this, id, package = std::move(package), fallbackReplace = std::move(fallbackReplace), done = std::move(done)](std::stop_token token) {
+    if (!text::equalsIgnoreCase(*hash, entry.md5)) {
+        log::error("checksum mismatch for {}: expected {} got {}", id.key(), entry.md5, *hash);
+        return std::unexpected(Error::make(ErrorCategory::Download, "verify", "The downloaded package is damaged (checksum mismatch).", *hash, true));
+    }
+    return {};
+}
+
+// download step: verify the freshly downloaded package, move it into the installer cache, and stop.
+void InstallationManager::verifyDownload(const VersionId& id, const CatalogEntry& entry, const std::filesystem::path& partial, const std::filesystem::path& target, std::stop_token token) {
+    if (auto verified = verifyChecksum(id, entry, partial, token); !verified) {
+        if (!verified.error().isCancelled()) {
+            platform::discardFile(partial);
+            removeDownloadMeta(partial);
+        }
         InstallProgress p;
-        p.stage = InstallStage::Deploying;
-        p.total = 100;
-        report(id, p);
-        platform::initializeApartment();
-
-        auto deploy = [&] {
-            Result<platform::InstalledPackage> outcome = std::unexpected(Error::make(ErrorCategory::Package, "deploy", "Minecraft could not be installed."));
-            for (int attempt = 1; attempt <= kDeployAttempts; ++attempt) {
-                if (token.stop_requested()) {
-                    return Result<platform::InstalledPackage>(std::unexpected(Error::cancelled("deploy")));
-                }
-                log::info("deploying {} (attempt {})", id.key(), attempt);
-                outcome = platform::deployPackage(package, token, [&](int percent) {
-                    InstallProgress dp;
-                    dp.stage = InstallStage::Deploying;
-                    dp.done = static_cast<std::uint64_t>(percent);
-                    dp.total = 100;
-                    report(id, dp);
-                });
-                if (outcome || outcome.error().isCancelled() || !outcome.error().retryable) {
-                    break;
-                }
-                log::warn("deploy attempt {} failed: {}", attempt, outcome.error().summary());
-                std::this_thread::sleep_for(std::chrono::seconds(2));
-            }
-            return outcome;
-        };
-
-        // windows replaces the installed version of a package family in place, so the
-        // previous one is only removed if that fails
-        Result<platform::InstalledPackage> result = deploy();
-        if (!result && !result.error().isCancelled() && fallbackReplace) {
-            log::warn("in place replacement failed, removing {} first: {}", text::toUtf8(*fallbackReplace), result.error().summary());
-            if (auto removed = platform::removePackage(*fallbackReplace, token); removed) {
-                versions_.clearDeployRecord(id.channel);
-                result = deploy();
-            } else if (!removed.error().isCancelled()) {
-                log::warn("previous version could not be removed: {}", removed.error().summary());
-            }
-        }
-
-        if (!result) {
-            p.stage = result.error().isCancelled() ? InstallStage::Cancelled : InstallStage::Failed;
-            p.error = result.error();
-            report(id, p);
-            finish(id);
-            if (done) {
-                done(id, std::unexpected(result.error()));
-            }
-            return;
-        }
-        DeployRecord record;
-        record.fullName = text::toUtf8(result->fullName);
-        record.version = id.number.toString();
-        versions_.saveDeployRecord(id.channel, record);
-        log::info("deployed {} at {}", id.key(), result->installLocation.string());
-        p.stage = InstallStage::Completed;
-        p.done = 100;
+        p.stage = verified.error().isCancelled() ? InstallStage::Cancelled : InstallStage::Failed;
+        p.error = verified.error();
         report(id, p);
         finish(id);
-        if (done) {
-            done(id, std::move(result));
+        return;
+    }
+    InstallProgress p;
+    p.stage = InstallStage::Finalizing;
+    p.done = entry.size;
+    p.total = entry.size;
+    report(id, p);
+    if (auto moved = platform::moveReplace(partial, target); !moved) {
+        p.stage = InstallStage::Failed;
+        p.error = moved.error();
+        report(id, p);
+        finish(id);
+        return;
+    }
+    removeDownloadMeta(partial);
+    log::info("downloaded {} to {}", id.key(), target.string());
+    p.stage = InstallStage::Downloaded;
+    p.done = entry.size;
+    p.total = entry.size;
+    report(id, p);
+    finish(id);
+}
+
+// install step: verify the cached package, then extract it into an isolated version.
+void InstallationManager::verifyAndExtract(const VersionId& id, const CatalogEntry& entry, const std::filesystem::path& target, std::stop_token token) {
+    if (auto verified = verifyChecksum(id, entry, target, token); !verified) {
+        if (!verified.error().isCancelled()) {
+            platform::discardFile(target);
         }
-    };
-    std::lock_guard lock(mutex_);
-    operations_[id] = scheduler_.start("activate " + id.key(), std::move(job));
-    return true;
+        InstallProgress p;
+        p.stage = verified.error().isCancelled() ? InstallStage::Cancelled : InstallStage::Failed;
+        p.error = verified.error();
+        report(id, p);
+        finish(id);
+        return;
+    }
+    extractVerifiedPackage(id, entry, target, token);
 }
 
 bool InstallationManager::removeDeployment(const VersionId& id, std::wstring fullName, RemoveDone done) {
@@ -263,9 +343,6 @@ bool InstallationManager::removeDeployment(const VersionId& id, std::wstring ful
         platform::initializeApartment();
         log::info("removing deployment {}", text::toUtf8(fullName));
         auto result = platform::removePackage(fullName, token);
-        if (result) {
-            versions_.clearDeployRecord(id.channel);
-        }
         finish(id);
         if (done) {
             done(id, std::move(result));

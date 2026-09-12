@@ -45,6 +45,7 @@ TEST_CASE(paths_layout) {
     auto layout = paths::layoutFor(L"D:\\citron");
     CHECK_EQ(layout.settingsFile, std::filesystem::path(L"D:\\citron\\settings.json"));
     CHECK_EQ(layout.installers, std::filesystem::path(L"D:\\citron\\installers"));
+    CHECK_EQ(layout.versions, std::filesystem::path(L"D:\\citron\\versions"));
     CHECK_EQ(layout.logs, std::filesystem::path(L"D:\\citron\\logs"));
     CHECK(!paths::localAppData().empty());
 }

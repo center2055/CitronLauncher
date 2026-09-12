@@ -2,6 +2,7 @@
 
 #include "app/AppState.h"
 #include "app/Strings.h"
+#include "ui/Animation.h"
 #include "ui/controls/Element.h"
 #include "ui/controls/IconButton.h"
 #include "ui/controls/ListView.h"
@@ -38,6 +39,9 @@ private:
     ListView* list_ = nullptr;
     std::vector<std::string> rowKeys_;
     std::vector<VersionRowView*> rows_;
+    Animated listFade_{1.0f, 210.0};
+    VersionFilter lastFilter_ = VersionFilter::All;
+    float slideFrom_ = 0.0f;
     std::wstring emptyText_;
     bool empty_ = false;
     Rect searchBox_;

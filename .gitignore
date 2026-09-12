@@ -1,5 +1,7 @@
 build/
+build-*/
 out/
+dist/
 .vs/
 .vscode/
 *.user
@@ -9,3 +11,12 @@ out/
 *.obj
 *.log
 CMakeUserPresets.json
+
+# reverse-engineering databases
+*.i64
+*.idb
+*.id0
+*.id1
+*.id2
+*.nam
+*.til

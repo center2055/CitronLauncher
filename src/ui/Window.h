@@ -2,6 +2,7 @@
 
 #include "core/Error.h"
 #include "core/TaskScheduler.h"
+#include "ui/Animation.h"
 #include "ui/Renderer.h"
 #include "ui/Theme.h"
 #include "ui/controls/Element.h"
@@ -88,6 +89,9 @@ private:
     HWND hwnd_ = nullptr;
     Renderer renderer_;
     Theme theme_ = Theme::darkTheme();
+    Theme themeFrom_ = Theme::darkTheme();
+    Theme themeTo_ = Theme::darkTheme();
+    Animated themeBlend_{1.0f, 200.0};
     Element* root_ = nullptr;
     Element* hovered_ = nullptr;
     Element* pressed_ = nullptr;

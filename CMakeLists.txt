@@ -72,6 +72,7 @@ add_executable(CitronLauncher WIN32
     src/download/DownloadManager.cpp
     src/minecraft/MinecraftService.cpp
     src/minecraft/VersionManager.cpp
+    src/minecraft/GdkPackageExtractor.cpp
     src/minecraft/InstallationManager.cpp
     src/minecraft/LaunchManager.cpp
     src/minecraft/PrerequisiteManager.cpp
@@ -113,9 +114,17 @@ add_executable(CitronLauncher WIN32
 target_link_libraries(CitronLauncher PRIVATE citron_core
     d3d11 dxgi d2d1 dwrite dcomp dwmapi winhttp oleaut32 uuid bcrypt
     user32 gdi32 version imm32 windowscodecs windowsapp)
-set_target_properties(CitronLauncher PROPERTIES OUTPUT_NAME "Citron")
+set_target_properties(CitronLauncher PROPERTIES OUTPUT_NAME "CitronLauncher")
 add_dependencies(CitronLauncher citron_buildinfo)
 target_include_directories(CitronLauncher PRIVATE resources)
+
+# Copy the bundled native components next to the executable.
+set(CITRON_LAUNCHERCORE_DIR "${CMAKE_SOURCE_DIR}/third_party/launchercore")
+if(EXISTS "${CITRON_LAUNCHERCORE_DIR}/launcher_core.dll")
+    add_custom_command(TARGET CitronLauncher POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:CitronLauncher>/native/launchercore"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory "${CITRON_LAUNCHERCORE_DIR}" "$<TARGET_FILE_DIR:CitronLauncher>/native/launchercore")
+endif()
 
 target_compile_options(citron_core PUBLIC $<$<CONFIG:Release>:/O2 /GL /Gy /Gw /Oi>)
 target_link_options(CitronLauncher PRIVATE

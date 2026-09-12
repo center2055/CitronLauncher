@@ -21,4 +21,8 @@ struct Theme {
     static Theme lightTheme();
 };
 
+// blends every colour of two palettes, used to cross fade the light/dark switch.
+// the dark flag follows the target so hover tints match where the switch lands.
+Theme mixTheme(const Theme& a, const Theme& b, float k);
+
 }

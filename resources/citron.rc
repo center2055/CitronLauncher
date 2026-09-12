@@ -8,7 +8,13 @@ IDR_FONT_BODY RCDATA "fonts/HankenGrotesk.ttf"
 IDR_FONT_MONO RCDATA "fonts/JetBrainsMono.ttf"
 IDR_FONT_TITLE RCDATA "fonts/SchibstedGrotesk.ttf"
 IDR_CATALOG RCDATA "../catalog/versions.json"
-IDR_ICON_PNG RCDATA "icons/citron.png"
+IDR_LAUNCHER_CORE RCDATA "../third_party/launchercore/launcher_core.dll"
+IDR_LAUNCHER_API RCDATA "../third_party/launchercore/launcher_api.dll"
+IDR_LIB_HTTP_CLIENT RCDATA "../third_party/launchercore/libHttpClient.dll"
+IDR_VCRUNTIME140_1 RCDATA "../third_party/launchercore/vcruntime140_1.dll"
+IDR_VCRUNTIME140 RCDATA "../third_party/launchercore/vcruntime140.dll"
+IDR_MSVCP140 RCDATA "../third_party/launchercore/msvcp140.dll"
+IDR_MSVCP140_CODECVT_IDS RCDATA "../third_party/launchercore/msvcp140_codecvt_ids.dll"
 
 VS_VERSION_INFO VERSIONINFO
 FILEVERSION CITRON_VERSION_MAJOR, CITRON_VERSION_MINOR, CITRON_VERSION_PATCH, 0
@@ -26,9 +32,9 @@ BEGIN
             VALUE "CompanyName", "Citron"
             VALUE "FileDescription", "Citron Launcher"
             VALUE "FileVersion", CITRON_VERSION_STRING
-            VALUE "InternalName", "Citron"
+            VALUE "InternalName", "CitronLauncher"
             VALUE "LegalCopyright", "GPL-3.0"
-            VALUE "OriginalFilename", "Citron.exe"
+            VALUE "OriginalFilename", "CitronLauncher.exe"
             VALUE "ProductName", "Citron Launcher"
             VALUE "ProductVersion", CITRON_VERSION_STRING
         END

@@ -57,4 +57,37 @@ Theme Theme::lightTheme() {
     return t;
 }
 
+Theme mixTheme(const Theme& a, const Theme& b, float k) {
+    Theme t = b;
+    t.bg = mix(a.bg, b.bg, k);
+    t.raised = mix(a.raised, b.raised, k);
+    t.textHi = mix(a.textHi, b.textHi, k);
+    t.textBody = mix(a.textBody, b.textBody, k);
+    t.textMute = mix(a.textMute, b.textMute, k);
+    t.textDim = mix(a.textDim, b.textDim, k);
+    t.textFaint = mix(a.textFaint, b.textFaint, k);
+    t.textLabel = mix(a.textLabel, b.textLabel, k);
+    t.inset = mix(a.inset, b.inset, k);
+    t.hover = mix(a.hover, b.hover, k);
+    t.sel = mix(a.sel, b.sel, k);
+    t.hairline = mix(a.hairline, b.hairline, k);
+    t.border = mix(a.border, b.border, k);
+    t.border2 = mix(a.border2, b.border2, k);
+    t.border3 = mix(a.border3, b.border3, k);
+    t.toggleOff = mix(a.toggleOff, b.toggleOff, k);
+    t.knobOff = mix(a.knobOff, b.knobOff, k);
+    t.scrim = mix(a.scrim, b.scrim, k);
+    t.accentText = mix(a.accentText, b.accentText, k);
+    t.danger = mix(a.danger, b.danger, k);
+    t.warn = mix(a.warn, b.warn, k);
+    t.accent = mix(a.accent, b.accent, k);
+    t.accentHover = mix(a.accentHover, b.accentHover, k);
+    t.accentPressed = mix(a.accentPressed, b.accentPressed, k);
+    t.accentInk = mix(a.accentInk, b.accentInk, k);
+    t.selectedTint = mix(a.selectedTint, b.selectedTint, k);
+    t.dangerTint = mix(a.dangerTint, b.dangerTint, k);
+    t.closeHover = mix(a.closeHover, b.closeHover, k);
+    return t;
+}
+
 }

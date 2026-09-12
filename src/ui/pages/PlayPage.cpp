@@ -22,7 +22,6 @@ protected:
     void renderContent(RenderContext& ctx) override {
         const Theme& t = ctx.theme;
         const Rect c = contentRect();
-        ctx.r.fillRect({c.x, c.y, 3.0f, 22.0f}, selected() ? t.accent : Color::transparent(), 2.0f);
         const TextStyle versionStyle{Font::Mono, 15.0f, 600, 0.0f};
         const TextStyle tagStyle{Font::Body, 11.0f, 700, 0.44f};
         const TextStyle sizeStyle{Font::Body, 12.0f, 400, 0.0f};
@@ -125,8 +124,11 @@ void PlayPage::rebuildDownloads(const AppState& state, const Strings& strings) {
         case InstallStage::Verifying:
             label = std::format(L"{} · {}", strings.statusVerifying, text::toWide(format::percent(p.fraction())));
             break;
-        case InstallStage::Deploying:
-            label = std::format(L"{} · {}", strings.statusInstalling, text::toWide(format::percent(p.fraction())));
+        case InstallStage::Extracting:
+            label = std::format(L"{} · {}", strings.statusExtracting, text::toWide(format::percent(p.fraction())));
+            break;
+        case InstallStage::Removing:
+            label = strings.statusRemoving;
             break;
         default:
             label = strings.statusDownloading;
@@ -174,12 +176,7 @@ void PlayPage::update(const AppState& state, const Strings& strings) {
     launch_->setEnabled(selected != nullptr && selected->installed && !state.launching);
     manage_->setLabel(strings.manageVersions);
     statusText_.clear();
-    if (selected != nullptr && isBusy(selected->progress.stage)) {
-        const auto& p = selected->progress;
-        if (p.stage == InstallStage::Deploying) {
-            statusText_ = std::format(L"{} {} · {}", strings.statusInstalling, versionText_, text::toWide(format::percent(p.fraction())));
-        }
-    } else if (selected == nullptr) {
+    if (selected == nullptr) {
         statusText_ = strings.noVersionHint;
     }
     envText_.clear();

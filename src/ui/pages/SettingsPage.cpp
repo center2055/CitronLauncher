@@ -20,11 +20,10 @@ const TextStyle kBody13{Font::Body, 13.0f, 400, 0.0f};
 
 class SettingsContent : public Element {
 public:
-    SettingsContent(PageActions actions, AboutInfo about, std::span<const std::uint8_t> iconPng) : actions_(std::move(actions)), about_(std::move(about)), iconPng_(iconPng) {
+    SettingsContent(PageActions actions, AboutInfo about) : actions_(std::move(actions)), about_(std::move(about)) {
         english_ = add(std::make_unique<Button>(L"English", ButtonKind::Segment, [this] { actions_.setLanguage("en"); }));
         german_ = add(std::make_unique<Button>(L"Deutsch", ButtonKind::Segment, [this] { actions_.setLanguage("de"); }));
         closeToggle_ = add(std::make_unique<Toggle>(true, [this](bool on) { actions_.setCloseOnLaunch(on); }));
-        keepToggle_ = add(std::make_unique<Toggle>(true, [this](bool on) { actions_.setKeepInstallers(on); }));
         updateToggle_ = add(std::make_unique<Toggle>(true, [this](bool on) { actions_.setCheckUpdates(on); }));
         browse_ = add(std::make_unique<Button>(L"", ButtonKind::Secondary, [this] { actions_.browseRoot(); }));
         browse_->setHeight(36.0f);
@@ -42,8 +41,8 @@ public:
         check_->setRadius(6.0f);
         check_->setLeadingIcon(Icon::Refresh, 13.0f);
         github_ = add(std::make_unique<Button>(L"GitHub ↗", ButtonKind::Link, [this] { actions_.openGithub(); }));
-        website_ = add(std::make_unique<Button>(L"", ButtonKind::Link, [this] { actions_.openWebsite(); }));
-        licenses_ = add(std::make_unique<Button>(L"", ButtonKind::Link, [this] { actions_.openLicenses(); }));
+        discord_ = add(std::make_unique<Button>(L"Discord ↗", ButtonKind::Link, [this] { actions_.openDiscord(); }));
+        kofi_ = add(std::make_unique<Button>(L"Ko-fi ↗", ButtonKind::Link, [this] { actions_.openKofi(); }));
     }
 
     void update(const AppState& state, const Strings& strings, const std::wstring& rootPath, const std::wstring& installersPath, const std::wstring& logsPath) {
@@ -51,7 +50,6 @@ public:
         english_->setSelected(state.settings.language == "en");
         german_->setSelected(state.settings.language == "de");
         closeToggle_->setOn(state.settings.closeOnLaunch, false);
-        keepToggle_->setOn(state.settings.keepInstallers, false);
         updateToggle_->setOn(state.settings.checkUpdates, false);
         rootPath_ = state.pendingRoot.empty() ? rootPath : state.pendingRoot;
         installersPath_ = installersPath;
@@ -62,8 +60,6 @@ public:
         reset_->setLabel(strings.reset);
         check_->setLabel(state.updateStatus == UpdateStatus::Checking ? strings.checking : strings.checkNow);
         check_->setBusy(state.updateStatus == UpdateStatus::Checking);
-        website_->setLabel(strings.website + L" ↗");
-        licenses_->setLabel(strings.licenses + L" ↗");
         switch (state.updateStatus) {
         case UpdateStatus::UpToDate:
             updateText_ = strings.upToDate;
@@ -113,16 +109,14 @@ public:
         float y = padY;
         y += 12.0f;
         y += 22.0f + 38.0f + 16.0f + 1.0f;
-        y += 3.0f * (16.0f + 38.0f + 16.0f + 1.0f);
+        y += 2.0f * (16.0f + 38.0f + 16.0f + 1.0f);
         y += 30.0f + 12.0f;
         y += 18.0f + 40.0f + 12.0f;
         y += 2.0f * 20.0f + 8.0f + 16.0f + 1.0f;
         y += 16.0f + 38.0f;
         y += 34.0f + 12.0f;
-        y += 16.0f + 40.0f + 14.0f + 1.0f;
-        y += 14.0f + 20.0f + 8.0f + 20.0f + 8.0f;
-        disclaimerHeight_ = host_ != nullptr && s_ != nullptr ? host_->measureText(s_->disclaimer, kBody13, std::max(50.0f, width_ - legalColumn_ - 24.0f), true).h : 20.0f;
-        y += disclaimerHeight_ + 24.0f;
+        y += 16.0f + 40.0f + 14.0f + 1.0f;   // about label, about row, gap, hairline
+        y += 14.0f + 20.0f + 24.0f;          // gap, links row, bottom padding
         return {available.w, y + padY};
     }
 
@@ -149,8 +143,8 @@ public:
         hairlines_.clear();
         hairlines_.push_back(y);
         y += 1.0f;
-        Toggle* toggles[] = {closeToggle_, keepToggle_, updateToggle_};
-        for (int i = 0; i < 3; ++i) {
+        Toggle* toggles[] = {closeToggle_, updateToggle_};
+        for (int i = 0; i < 2; ++i) {
             y += 16.0f;
             toggleRows_[i] = {left, y, width_, 38.0f};
             toggles[i]->arrange({right - 40.0f, y + 8.0f, 40.0f, 22.0f});
@@ -192,8 +186,8 @@ public:
         infoGridY_ = y;
         {
             const float linksY = y + 20.0f + 8.0f;
-            float lx = left + legalColumn_;
-            for (Button* b : {github_, website_, licenses_}) {
+            float lx = left;
+            for (Button* b : {github_, discord_, kofi_}) {
                 const Size s = b->measure({});
                 b->arrange({lx, linksY, s.w, 20.0f});
                 lx += s.w + 18.0f;
@@ -218,8 +212,7 @@ public:
         ctx.r.fillRect(segment_, t.inset, 8.0f);
         ctx.r.strokeRect(segment_, t.border, 1.0f, 8.0f);
         titleSub(toggleRows_[0], s.closeOnLaunch, s.closeOnLaunchSub, width - 60.0f);
-        titleSub(toggleRows_[1], s.keepInstallers, s.keepInstallersSub, width - 60.0f);
-        titleSub(toggleRows_[2], s.checkUpdates, s.checkUpdatesSub, width - 60.0f);
+        titleSub(toggleRows_[1], s.checkUpdates, s.checkUpdatesSub, width - 60.0f);
         for (const float y : hairlines_) {
             ctx.r.fillRect({left, y, width, 1.0f}, t.hairline);
         }
@@ -233,51 +226,40 @@ public:
         ctx.r.drawText(s.logs, kBody13, {left, pathGridY_ + 28.0f, col, 20.0f}, t.textDim);
         ctx.r.drawText(logsPath_, kMono13, {left + col, pathGridY_ + 28.0f, width - col, 20.0f}, t.textBody);
         ctx.r.drawText(s.aboutUpper, kLabel, {left, aboutLabelY_, width, 12.0f}, t.textLabel);
-        if (!icon_ && !iconPng_.empty()) {
-            icon_ = ctx.r.loadPng(iconPng_);
-            iconGeneration_ = ctx.r.generation();
-        } else if (icon_ && iconGeneration_ != ctx.r.generation()) {
-            icon_ = ctx.r.loadPng(iconPng_);
-            iconGeneration_ = ctx.r.generation();
-        }
-        ctx.r.drawBitmap(icon_.get(), {aboutRow_.x, aboutRow_.y + 3.0f, 34.0f, 34.0f}, 1.0f, 9.0f);
-        const float textX = aboutRow_.x + 34.0f + 14.0f;
+        const float textX = aboutRow_.x;
         const TextStyle nameStyle{Font::Title, 15.0f, 700, 0.0f};
         const float nameWidth = host_->measureText(L"Citron Launcher", nameStyle).w;
         ctx.r.drawText(L"Citron Launcher", nameStyle, {textX, aboutRow_.y, nameWidth + 2.0f, 20.0f}, t.textHi);
         ctx.r.drawText(about_.version, {Font::Body, 15.0f, 500, 0.0f}, {textX + nameWidth + 6.0f, aboutRow_.y, 120.0f, 20.0f}, t.textMute);
         ctx.r.drawText(s.aboutSub, kSub, {textX, aboutRow_.y + 20.0f, check_->bounds().x - textX - 160.0f, 18.0f}, t.textMute);
         const float statusRight = check_->bounds().x - 14.0f;
-        ctx.r.drawText(updateText_, {Font::Body, 13.0f, 600, 0.0f}, {statusRight - 200.0f, aboutRow_.y + 1.0f, 200.0f, 18.0f}, Text::roleColor(t, updateRole_), {Align::End, Align::Center, true, false});
-        ctx.r.drawText(checkedText_, {Font::Body, 12.0f, 400, 0.0f}, {statusRight - 200.0f, aboutRow_.y + 21.0f, 200.0f, 16.0f}, t.textDim, {Align::End, Align::Center, true, false});
-        const float infoCol = legalColumn_;
-        ctx.r.drawText(s.build, kBody13, {left, infoGridY_, infoCol, 20.0f}, t.textDim);
-        ctx.r.drawText(about_.build, kMono13, {left + infoCol, infoGridY_, width - infoCol, 20.0f}, t.textBody);
-        ctx.r.drawText(s.links, kBody13, {left, infoGridY_ + 28.0f, infoCol, 20.0f}, t.textDim);
-        ctx.r.drawText(s.legal, kBody13, {left, infoGridY_ + 56.0f, infoCol, 20.0f}, t.textDim);
-        ctx.r.drawText(s.disclaimer, kBody13, {left + infoCol, infoGridY_ + 56.0f, width - infoCol, disclaimerHeight_ + 4.0f}, t.textDim, {Align::Start, Align::Start, false, true});
+        const Rect statusBtn = check_->bounds();
+        const float statusCenter = statusBtn.y + statusBtn.h / 2.0f;
+        if (checkedText_.empty()) {
+            ctx.r.drawText(updateText_, {Font::Body, 13.0f, 600, 0.0f}, {statusRight - 200.0f, statusCenter - 9.0f, 200.0f, 18.0f}, Text::roleColor(t, updateRole_), {Align::End, Align::Center, true, false});
+        } else {
+            ctx.r.drawText(updateText_, {Font::Body, 13.0f, 600, 0.0f}, {statusRight - 200.0f, statusCenter - 18.0f, 200.0f, 18.0f}, Text::roleColor(t, updateRole_), {Align::End, Align::Center, true, false});
+            ctx.r.drawText(checkedText_, {Font::Body, 12.0f, 400, 0.0f}, {statusRight - 200.0f, statusCenter + 1.0f, 200.0f, 16.0f}, t.textDim, {Align::End, Align::Center, true, false});
+        }
+        ctx.r.drawText(s.links, kBody13, {left, infoGridY_, legalColumn_, 20.0f}, t.textDim);
         Element::render(ctx);
     }
 
 private:
     PageActions actions_;
     AboutInfo about_;
-    std::span<const std::uint8_t> iconPng_;
     const Strings* s_ = nullptr;
-    winrt::com_ptr<ID2D1Bitmap1> icon_;
-    unsigned iconGeneration_ = 0;
     Button* english_ = nullptr;
     Button* german_ = nullptr;
     Toggle* closeToggle_ = nullptr;
-    Toggle* keepToggle_ = nullptr;
     Toggle* updateToggle_ = nullptr;
     Button* browse_ = nullptr;
     Button* apply_ = nullptr;
     Button* reset_ = nullptr;
     Button* check_ = nullptr;
     Button* github_ = nullptr;
-    Button* website_ = nullptr;
-    Button* licenses_ = nullptr;
+    Button* discord_ = nullptr;
+    Button* kofi_ = nullptr;
     std::wstring rootPath_;
     std::wstring installersPath_;
     std::wstring logsPath_;
@@ -291,19 +273,18 @@ private:
     float pathGridY_ = 0.0f;
     float aboutLabelY_ = 0.0f;
     float infoGridY_ = 0.0f;
-    float disclaimerHeight_ = 20.0f;
     float legalColumn_ = 70.0f;
     Rect languageRow_;
     Rect segment_;
-    Rect toggleRows_[3];
+    Rect toggleRows_[2];
     Rect rootRow_;
     Rect aboutRow_;
     std::vector<float> hairlines_;
 };
 
-SettingsPage::SettingsPage(PageActions actions, AboutInfo about, std::span<const std::uint8_t> iconPng) {
+SettingsPage::SettingsPage(PageActions actions, AboutInfo about) {
     scroll_ = add(std::make_unique<ScrollView>());
-    auto content = std::make_unique<SettingsContent>(std::move(actions), std::move(about), iconPng);
+    auto content = std::make_unique<SettingsContent>(std::move(actions), std::move(about));
     content_ = content.get();
     scroll_->setContent(std::move(content));
 }

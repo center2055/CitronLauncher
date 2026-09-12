@@ -27,8 +27,21 @@ float ScrollView::maxOffset() const {
     return std::max(0.0f, contentHeight_ + padTop_ + padBottom_ - bounds_.h);
 }
 
+// repositions the content for the current offset without re-measuring it, so a
+// running scroll animation does not re-measure the whole list every frame
+void ScrollView::applyOffset() {
+    if (content_ == nullptr) {
+        return;
+    }
+    const float width = std::max(0.0f, bounds_.w - padLeft_ - padRight_);
+    content_->arrange({bounds_.x + padLeft_, bounds_.y + padTop_ - offset_, width, contentHeight_});
+}
+
+// the instant path: dragging the thumb, keyboard focus and programmatic jumps
+// all land immediately so they never fight the running wheel animation
 void ScrollView::scrollTo(float offset) {
     const float clamped = std::clamp(offset, 0.0f, maxOffset());
+    scroll_.jump(clamped);
     if (std::fabs(clamped - offset_) > 0.01f) {
         offset_ = clamped;
         if (content_ != nullptr) {
@@ -63,10 +76,22 @@ void ScrollView::arrange(const Rect& bounds) {
     const Size s = content_->measure({width, 1e6f});
     contentHeight_ = s.h;
     offset_ = std::clamp(offset_, 0.0f, maxOffset());
+    if (!scroll_.active()) {
+        scroll_.jump(offset_);
+    }
     content_->arrange({bounds.x + padLeft_, bounds.y + padTop_ - offset_, width, s.h});
 }
 
 void ScrollView::render(RenderContext& ctx) {
+    const bool animating = scroll_.step(ctx.now);
+    const float value = std::clamp(scroll_.value(), 0.0f, maxOffset());
+    if (std::fabs(value - offset_) > 0.01f) {
+        offset_ = value;
+        applyOffset();
+    }
+    if (animating && host_ != nullptr) {
+        host_->requestFrame();
+    }
     ctx.r.pushClip(bounds_);
     Element::render(ctx);
     ctx.r.popClip();
@@ -106,7 +131,13 @@ bool ScrollView::onWheel(Point, float delta) {
     if (maxOffset() <= 0.0f) {
         return false;
     }
-    scrollTo(offset_ - delta * 48.0f);
+    // accumulate onto the target rather than the current position, so fast
+    // ticks compound instead of restarting from a half finished scroll
+    scroll_.set(std::clamp(scroll_.target() - delta * 48.0f, 0.0f, maxOffset()));
+    if (host_ != nullptr) {
+        host_->requestFrame();
+    }
+    invalidate();
     return true;
 }
 

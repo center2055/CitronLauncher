@@ -37,6 +37,7 @@ Layout layoutFor(const std::filesystem::path& root) {
     layout.settingsFile = root / L"settings.json";
     layout.installers = root / L"installers";
     layout.downloads = root / L"downloads";
+    layout.versions = root / L"versions";
     layout.cache = root / L"cache";
     layout.logs = root / L"logs";
     return layout;
@@ -47,7 +48,7 @@ Layout defaultLayout() {
 }
 
 Result<void> ensureDirectories(const Layout& layout) {
-    for (const auto* dir : {&layout.root, &layout.installers, &layout.downloads, &layout.cache, &layout.logs}) {
+    for (const auto* dir : {&layout.root, &layout.installers, &layout.downloads, &layout.versions, &layout.cache, &layout.logs}) {
         std::error_code ec;
         std::filesystem::create_directories(*dir, ec);
         if (ec) {

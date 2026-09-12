@@ -23,7 +23,8 @@ constexpr wchar_t kInstanceMutex[] = L"Local\\CitronLauncher.SingleInstance";
 constexpr char kDefaultCatalogUrl[] = "https://raw.githubusercontent.com/center2055/CitronLauncher/main/catalog/versions.json";
 constexpr char kReleasesApi[] = "https://api.github.com/repos/center2055/CitronLauncher/releases/latest";
 constexpr wchar_t kGithubUrl[] = L"https://github.com/center2055/CitronLauncher";
-constexpr wchar_t kLicensesUrl[] = L"https://github.com/center2055/CitronLauncher/blob/main/THIRD_PARTY_NOTICES.md";
+constexpr wchar_t kDiscordUrl[] = L"https://discord.gg/f7JTg86r8A";
+constexpr wchar_t kKofiUrl[] = L"https://ko-fi.com/center2055";
 constexpr std::int64_t kUpdateInterval = 6 * 3600;
 
 std::wstring pathText(const std::filesystem::path& path) {
@@ -177,10 +178,6 @@ void Application::buildUi() {
         state_.settings.closeOnLaunch = on;
         persistSettings();
     };
-    actions.setKeepInstallers = [this](bool on) {
-        state_.settings.keepInstallers = on;
-        persistSettings();
-    };
     actions.setCheckUpdates = [this](bool on) {
         state_.settings.checkUpdates = on;
         persistSettings();
@@ -190,17 +187,16 @@ void Application::buildUi() {
     actions.resetRoot = [this] { resetRoot(); };
     actions.checkUpdates = [this] { checkForUpdates(true); };
     actions.openGithub = [this] { openUrl(kGithubUrl); };
-    actions.openWebsite = [this] { openUrl(kGithubUrl); };
-    actions.openLicenses = [this] { openUrl(kLicensesUrl); };
+    actions.openDiscord = [this] { openUrl(kDiscordUrl); };
+    actions.openKofi = [this] { openUrl(kKofiUrl); };
     actions.openStore = [this] { openUrl(platform::gamingServicesStoreUrl()); };
 
     ui::AboutInfo about;
     about.version = text::toWide(CITRON_VERSION_STRING);
-    about.build = text::toWide(std::format("{}+{} · x64 · {} · C++23", CITRON_VERSION_STRING, CITRON_COMMIT, CITRON_COMPILER));
 
     play_ = shell_->pageHost()->add(std::make_unique<ui::PlayPage>(actions));
     versions_ = shell_->pageHost()->add(std::make_unique<ui::VersionsPage>(actions));
-    settingsPage_ = shell_->pageHost()->add(std::make_unique<ui::SettingsPage>(actions, about, resource(IDR_ICON_PNG)));
+    settingsPage_ = shell_->pageHost()->add(std::make_unique<ui::SettingsPage>(actions, about));
     versions_->setVisible(false);
     settingsPage_->setVisible(false);
 
@@ -257,7 +253,11 @@ void Application::syncFromService() {
                 break;
             }
         }
-        if (old != nullptr && isBusy(old->progress.stage) && old->progress.stage != InstallStage::Deploying && row.progress.stage == InstallStage::Completed) {
+        if (old != nullptr && isBusy(old->progress.stage) && row.progress.stage == InstallStage::Downloaded) {
+            showToast(strings().toastDownloaded + L" " + text::toWide(row.id.number.toString()));
+            service_->dismiss(row.id);
+        }
+        if (old != nullptr && isBusy(old->progress.stage) && row.progress.stage == InstallStage::Completed) {
             showToast(strings().toastInstalled + L" " + text::toWide(row.id.number.toString()));
             service_->dismiss(row.id);
         }
@@ -366,7 +366,7 @@ void Application::launch() {
     const VersionId id = row->id;
     auto start = [this, id] {
         log::info("launch requested for {}", id.key());
-        service_->launch(id, state_.settings.keepInstallers, [this, id](Result<void> result) {
+        service_->launch(id, [this, id](Result<void> result) {
             if (!result) {
                 if (!result.error().isCancelled()) {
                     showError(strings().errLaunchTitle, result.error());
@@ -380,29 +380,8 @@ void Application::launch() {
         });
         refreshUi();
     };
-    auto deployed = service_->deployedFor(id.channel);
-    if (!row->deployed && deployed && !deployed->deployedByCitron) {
-        const Strings& s = strings();
-        const std::wstring current = text::toWide(deployed->id.number.toString());
-        const std::wstring target = text::toWide(id.number.toString());
-        std::vector<std::wstring> paragraphs;
-        paragraphs.push_back(std::vformat(s.replaceBody, std::make_wformat_args(current, target)));
-        paragraphs.push_back(s.replaceStore);
-        const VersionRow* currentRow = state_.find(deployed->id);
-        if (currentRow == nullptr || currentRow->deployed) {
-            bool hasPackage = false;
-            if (auto info = service_->find(deployed->id)) {
-                hasPackage = info->packageFile.has_value();
-            }
-            if (!hasPackage) {
-                paragraphs.push_back(std::vformat(s.replaceKeep, std::make_wformat_args(current)));
-            }
-        }
-        shell_->dialog().show(s.replaceTitle, std::move(paragraphs), s.replaceConfirm, s.dialogCancel, false, start, nullptr);
-        window_.layout();
-        window_.invalidate();
-        return;
-    }
+    // Installed versions are now isolated under Citron's managed folder. They
+    // launch directly from there and never replace the Store/Xbox package.
     start();
 }
 

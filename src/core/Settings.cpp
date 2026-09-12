@@ -13,7 +13,6 @@ json::Value settingsToJson(const Settings& s) {
     v.set("language", s.language);
     v.set("theme", s.theme);
     v.set("closeOnLaunch", s.closeOnLaunch);
-    v.set("keepInstallers", s.keepInstallers);
     v.set("checkUpdates", s.checkUpdates);
     v.set("selectedVersion", s.selectedVersion);
     v.set("rootDirectory", s.rootDirectory);
@@ -38,7 +37,6 @@ Settings settingsFromJson(const json::Value& v) {
         s.theme = d.theme;
     }
     s.closeOnLaunch = v["closeOnLaunch"].asBool(d.closeOnLaunch);
-    s.keepInstallers = v["keepInstallers"].asBool(d.keepInstallers);
     s.checkUpdates = v["checkUpdates"].asBool(d.checkUpdates);
     s.selectedVersion = v["selectedVersion"].asString();
     s.rootDirectory = v["rootDirectory"].asString();

@@ -22,11 +22,9 @@ struct InstalledPackage {
     bool isFramework = false;
 };
 
-using DeployProgress = std::function<void(int percent)>;
-
 std::vector<InstalledPackage> findPackagesByFamily(std::wstring_view familyName);
+std::vector<InstalledPackage> findPackagesByName(std::wstring_view name);
 std::optional<InstalledPackage> findPackageByName(std::wstring_view name);
-Result<InstalledPackage> deployPackage(const std::filesystem::path& package, std::stop_token token, const DeployProgress& progress);
 Result<void> removePackage(std::wstring_view fullName, std::stop_token token);
 Result<void> launchPackage(std::wstring_view familyName);
 void initializeApartment();

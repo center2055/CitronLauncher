@@ -426,6 +426,22 @@ void Renderer::popOpacity() {
     context_->PopLayer();
 }
 
+void Renderer::pushTransform(float dx, float dy) {
+    D2D1_MATRIX_3X2_F current{};
+    context_->GetTransform(&current);
+    transforms_.push_back(current);
+    const D2D1::Matrix3x2F base(current._11, current._12, current._21, current._22, current._31, current._32);
+    context_->SetTransform(D2D1::Matrix3x2F::Translation(dx, dy) * base);
+}
+
+void Renderer::popTransform() {
+    if (transforms_.empty()) {
+        return;
+    }
+    context_->SetTransform(transforms_.back());
+    transforms_.pop_back();
+}
+
 void Renderer::fillGeometry(ID2D1Geometry* geometry, Color color, const D2D1_MATRIX_3X2_F& transform) {
     if (geometry == nullptr) {
         return;

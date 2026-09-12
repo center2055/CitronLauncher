@@ -22,7 +22,6 @@ TEST_CASE(settings_round_trip) {
     s.language = "de";
     s.theme = "light";
     s.closeOnLaunch = false;
-    s.keepInstallers = false;
     s.selectedVersion = "release/1.26.45.01";
     s.windowWidth = 1100;
     s.windowHeight = 660;
@@ -46,7 +45,6 @@ TEST_CASE(settings_save_and_load) {
     const auto file = tempDir() / "settings.json";
     Settings s;
     s.selectedVersion = "preview/1.26.60.21";
-    s.keepInstallers = false;
     auto saved = saveSettings(s, file);
     CHECK(saved.has_value());
     CHECK(!std::filesystem::exists(file.wstring() + L".tmp"));

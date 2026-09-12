@@ -3,6 +3,7 @@
 #include "core/Logger.h"
 #include "core/Text.h"
 #include "platform/windows/Activation.h"
+#include "platform/windows/FileOps.h"
 #include "platform/windows/PackageManager.h"
 #include "platform/windows/Process.h"
 
@@ -73,6 +74,35 @@ Result<void> launchThroughHelper(VersionChannel channel, const std::filesystem::
     return std::unexpected(Error::make(ErrorCategory::Launch, "launch", "Minecraft did not start.", "no game process appeared within three minutes"));
 }
 
+Result<void> launchLocalGdk(const std::filesystem::path& installLocation, std::stop_token token) {
+    const std::filesystem::path executable = installLocation / kGameExe;
+    if (!platform::fileExists(executable)) {
+        return std::unexpected(Error::make(ErrorCategory::Launch, "launch", "The selected isolated version is incomplete.", executable.string()));
+    }
+    std::wstring commandLine = L"\"" + executable.wstring() + L"\"";
+    STARTUPINFOW startup{};
+    startup.cb = sizeof(startup);
+    PROCESS_INFORMATION process{};
+    if (!CreateProcessW(executable.c_str(), commandLine.data(), nullptr, nullptr, FALSE, 0, nullptr, installLocation.c_str(), &startup, &process)) {
+        return std::unexpected(Error::fromWin32(ErrorCategory::Launch, "launch", GetLastError(), "Minecraft could not be started from the isolated version folder."));
+    }
+    CloseHandle(process.hThread);
+    const auto deadline = std::chrono::steady_clock::now() + kEarlyExitWindow;
+    Result<void> result;
+    while (std::chrono::steady_clock::now() < deadline) {
+        if (token.stop_requested()) break;
+        if (WaitForSingleObject(process.hProcess, 250) == WAIT_OBJECT_0) {
+            DWORD code = 0;
+            GetExitCodeProcess(process.hProcess, &code);
+            result = std::unexpected(Error::make(ErrorCategory::Launch, "launch", "Minecraft closed right after starting.",
+                                                 std::format("exit code 0x{:08X}", code)));
+            break;
+        }
+    }
+    CloseHandle(process.hProcess);
+    return result;
+}
+
 }
 
 LaunchManager::LaunchManager(TaskScheduler& scheduler) : scheduler_(scheduler) {}
@@ -91,9 +121,12 @@ bool LaunchManager::launch(VersionChannel channel, std::filesystem::path install
             done(std::unexpected(Error::make(ErrorCategory::Launch, "launch", "Minecraft is already running.")));
             return;
         }
-        log::info("launching {} from {} ({})", channelName(channel), installLocation.string(), mode == LaunchMode::Direct ? "direct" : "helper");
+        log::info("launching {} from {} ({})", channelName(channel), installLocation.string(),
+                  mode == LaunchMode::LocalGdk ? "local-gdk" : mode == LaunchMode::Direct ? "direct" : "helper");
         Result<void> result;
-        if (mode == LaunchMode::Direct) {
+        if (mode == LaunchMode::LocalGdk) {
+            result = launchLocalGdk(installLocation, token);
+        } else if (mode == LaunchMode::Direct) {
             result = launchDirect(channel, installLocation, token);
             if (!result && !result.error().isCancelled() && result.error().detail.find("exit code") == std::string::npos) {
                 log::warn("direct launch failed, falling back to the launch helper: {}", result.error().summary());

@@ -11,6 +11,7 @@ struct Layout {
     std::filesystem::path settingsFile;
     std::filesystem::path installers;
     std::filesystem::path downloads;
+    std::filesystem::path versions;
     std::filesystem::path cache;
     std::filesystem::path logs;
 };

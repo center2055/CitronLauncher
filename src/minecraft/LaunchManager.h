@@ -15,6 +15,7 @@ using LaunchDone = std::function<void(Result<void> result)>;
 enum class LaunchMode {
     Direct,
     Helper,
+    LocalGdk,
 };
 
 class LaunchManager {

@@ -13,6 +13,9 @@
 namespace citron {
 
 std::uint64_t VersionInfo::size() const {
+    if (managedSize != 0) {
+        return managedSize;
+    }
     if (packageSize != 0) {
         return packageSize;
     }
@@ -116,10 +119,15 @@ void MinecraftService::rebuild() {
     for (const auto& partial : partials_) {
         find(partial.id).partialSize = partial.size;
     }
+    for (const auto& managed : managed_) {
+        auto& v = find(managed.id);
+        v.managed = true;
+        v.managedLocation = managed.path;
+        v.managedSize = managed.size;
+    }
     for (const auto& deployed : deployed_) {
         auto& v = find(deployed.id);
         v.deployed = true;
-        v.deployedByCitron = deployed.byCitron;
         v.deployedFullName = deployed.package.fullName;
         v.deployedLocation = deployed.package.installLocation;
     }
@@ -139,8 +147,10 @@ void MinecraftService::start(std::string_view catalogUrl) {
         catalog_ = versions_.loadCatalog(embeddedCatalog_);
         packages_ = versions_.scanPackages();
         partials_ = versions_.scanPartials();
+        versions_.cleanStaging();
+        managed_ = versions_.scanManagedInstallations();
         rebuild();
-        log::info("catalog ready: {} versions, {} packages on disk, {} partial downloads", catalog_.entries.size(), packages_.size(), partials_.size());
+        log::info("catalog ready: {} versions, {} isolated installs, {} package caches, {} partial downloads", catalog_.entries.size(), managed_.size(), packages_.size(), partials_.size());
     }
     notify();
     refreshInstalled();
@@ -153,14 +163,16 @@ void MinecraftService::refreshInstalled() {
         platform::initializeApartment();
         auto packages = versions_.scanPackages();
         auto partials = versions_.scanPartials();
+        auto managed = versions_.scanManagedInstallations();
         auto deployed = versions_.scanDeployed();
         for (const auto& d : deployed) {
-            log::info("deployed {} at {} ({})", d.id.key(), d.package.installLocation.string(), d.byCitron ? "citron" : "other");
+            log::info("deployed {} at {}", d.id.key(), d.package.installLocation.string());
         }
         {
             std::lock_guard lock(mutex_);
             packages_ = std::move(packages);
             partials_ = std::move(partials);
+            managed_ = std::move(managed);
             deployed_ = std::move(deployed);
             rebuild();
         }
@@ -216,7 +228,7 @@ void MinecraftService::updateOperation(const VersionId& id, const InstallProgres
         } else {
             snapshot_.operations[id] = progress;
         }
-        rescan = progress.stage == InstallStage::Completed || progress.stage == InstallStage::Cancelled || progress.stage == InstallStage::Failed;
+        rescan = progress.stage == InstallStage::Completed || progress.stage == InstallStage::Downloaded || progress.stage == InstallStage::Cancelled || progress.stage == InstallStage::Failed;
     }
     if (rescan) {
         refreshInstalled();
@@ -268,84 +280,92 @@ bool MinecraftService::anyBusy() const {
     return installs_.anyBusy() || launcher_.busy();
 }
 
+void MinecraftService::clearOperation(const VersionId& id) {
+    {
+        std::lock_guard lock(mutex_);
+        snapshot_.operations.erase(id);
+    }
+    notify();
+}
+
+// a delete runs on a worker now, so the rest of the service has to be able to
+// ask whether one is still in flight for a version
+bool MinecraftService::removing(const VersionId& id) const {
+    std::lock_guard lock(mutex_);
+    const auto it = snapshot_.operations.find(id);
+    return it != snapshot_.operations.end() && it->second.stage == InstallStage::Removing;
+}
+
 void MinecraftService::remove(const VersionId& id, std::function<void(Result<void>)> done) {
     auto info = find(id);
     if (!info) {
         done(std::unexpected(Error::make(ErrorCategory::Internal, "remove", "This version is not known.")));
         return;
     }
-    if (busy(id)) {
+    if (busy(id) || removing(id)) {
         done(std::unexpected(Error::make(ErrorCategory::Internal, "remove", "This version is busy.")));
         return;
     }
-    if (info->deployed && gameRunningOnChannel(id.channel)) {
-        done(std::unexpected(Error::make(ErrorCategory::Launch, "remove", "Minecraft is running. Close it before removing this version.")));
-        return;
-    }
     log::info("remove requested for {}", id.key());
-    if (info->packageFile) {
-        if (!pathsafety::isInside(versions_.layout().installers, *info->packageFile)) {
-            done(std::unexpected(Error::make(ErrorCategory::Filesystem, "remove", "The package is outside the launcher folder and was not touched.")));
-            return;
-        }
-        if (auto removed = platform::removeFile(*info->packageFile); !removed) {
-            done(std::unexpected(removed.error()));
-            return;
-        }
-    }
-    const auto partial = versions_.partialPath(id);
-    if (auto cleared = platform::removeFile(partial); !cleared) {
-        log::warn("partial download could not be removed: {}", cleared.error().summary());
-    }
-    removeDownloadMeta(partial);
-    {
-        std::lock_guard lock(mutex_);
-        snapshot_.operations.erase(id);
-    }
-    if (info->deployed) {
-        installs_.removeDeployment(id, info->deployedFullName, [this, done](const VersionId&, Result<void> result) {
+    // Deleting an isolated install unlinks tens of thousands of files. Running
+    // that on the UI thread blocked the message pump for the whole delete and
+    // froze the window, so only the cheap lookups above happen here and the
+    // filesystem work is handed to a worker.
+    InstallProgress removing;
+    removing.stage = InstallStage::Removing;
+    updateOperation(id, removing);
+    scheduler_.run([this, id, info = *info, done = std::move(done)](std::stop_token) {
+        platform::initializeApartment();
+        // The outcome travels through done(); the operation entry is erased
+        // rather than parked on a terminal stage, because a busy -> Completed
+        // transition is what fires the "Installed" toast.
+        auto finish = [this, id, done](Result<void> result) {
+            clearOperation(id);
             refreshInstalled();
             dispatcher_.post([done, result] { done(result); });
-        });
-        return;
-    }
-    refreshInstalled();
-    done({});
-}
-
-void MinecraftService::activate(const VersionId& id, bool keepPackage, std::function<void(Result<std::filesystem::path>)> done) {
-    auto info = find(id);
-    if (!info || (!info->packageFile && !info->deployed)) {
-        done(std::unexpected(Error::make(ErrorCategory::Package, "activate", "This version is not installed.")));
-        return;
-    }
-    if (info->deployed) {
-        done(info->deployedLocation);
-        return;
-    }
-    if (busy(id)) {
-        done(std::unexpected(Error::make(ErrorCategory::Internal, "activate", "This version is busy.")));
-        return;
-    }
-    if (gameRunningOnChannel(id.channel)) {
-        done(std::unexpected(Error::make(ErrorCategory::Launch, "activate", "Minecraft is running. Close it before switching versions.")));
-        return;
-    }
-    std::optional<std::wstring> fallbackReplace;
-    if (auto current = deployedFor(id.channel)) {
-        fallbackReplace = current->deployedFullName;
-    }
-    const std::filesystem::path package = *info->packageFile;
-    installs_.activate(id, package, fallbackReplace, [this, done, keepPackage, package](const VersionId& vid, Result<platform::InstalledPackage> result) {
-        if (result && !keepPackage) {
-            log::info("discarding package file for {}", vid.key());
-            if (auto removed = platform::removeFile(package); !removed) {
-                log::warn("package file could not be removed: {}", removed.error().summary());
+        };
+        if ((info.deployed && gameRunningOnChannel(id.channel)) || (info.managed && platform::anyProcessUnder(L"Minecraft.Windows.exe", info.managedLocation))) {
+            finish(std::unexpected(Error::make(ErrorCategory::Launch, "remove", "Minecraft is running. Close it before removing this version.")));
+            return;
+        }
+        if (info.packageFile) {
+            if (!pathsafety::isInside(versions_.layout().installers, *info.packageFile)) {
+                finish(std::unexpected(Error::make(ErrorCategory::Filesystem, "remove", "The package is outside the launcher folder and was not touched.")));
+                return;
+            }
+            if (auto removed = platform::removeFile(*info.packageFile); !removed) {
+                finish(std::unexpected(removed.error()));
+                return;
             }
         }
-        refreshInstalled();
-        Result<std::filesystem::path> location = result ? Result<std::filesystem::path>(result->installLocation) : std::unexpected(result.error());
-        dispatcher_.post([done, location] { done(location); });
+        const auto partial = versions_.partialPath(id);
+        if (auto cleared = platform::removeFile(partial); !cleared) {
+            log::warn("partial download could not be removed: {}", cleared.error().summary());
+        }
+        removeDownloadMeta(partial);
+        if (info.managed) {
+            if (!pathsafety::isInside(versions_.layout().versions, info.managedLocation)) {
+                finish(std::unexpected(Error::make(ErrorCategory::Filesystem, "remove", "The version folder is outside Citron's managed folder and was not touched.")));
+                return;
+            }
+            if (auto removed = platform::removeDirectoryTree(info.managedLocation); !removed) {
+                finish(std::unexpected(removed.error()));
+                return;
+            }
+        }
+        if (info.deployed) {
+            const bool started = installs_.removeDeployment(id, info.deployedFullName, [this, done](const VersionId& target, Result<void> result) {
+                clearOperation(target);
+                refreshInstalled();
+                dispatcher_.post([done, result] { done(result); });
+            });
+            if (started) {
+                return;
+            }
+            finish(std::unexpected(Error::make(ErrorCategory::Internal, "remove", "This version is busy.")));
+            return;
+        }
+        finish({});
     });
 }
 
@@ -358,7 +378,7 @@ void MinecraftService::reportLaunch(std::function<void(Result<void>)> done, Resu
     dispatcher_.post([done, result] { done(result); });
 }
 
-void MinecraftService::launch(const VersionId& id, bool keepPackage, std::function<void(Result<void>)> done) {
+void MinecraftService::launch(const VersionId& id, std::function<void(Result<void>)> done) {
     auto info = find(id);
     if (!info) {
         done(std::unexpected(Error::make(ErrorCategory::Launch, "launch", "No version is selected.")));
@@ -366,6 +386,12 @@ void MinecraftService::launch(const VersionId& id, bool keepPackage, std::functi
     }
     if (!info->installed()) {
         done(std::unexpected(Error::make(ErrorCategory::Launch, "launch", "The selected version is not installed.")));
+        return;
+    }
+    // a delete is unlinking these files right now; installed() keeps reporting
+    // true until the rescan that follows it
+    if (removing(id)) {
+        done(std::unexpected(Error::make(ErrorCategory::Launch, "launch", "This version is being deleted.")));
         return;
     }
     {
@@ -391,17 +417,14 @@ void MinecraftService::launch(const VersionId& id, bool keepPackage, std::functi
     auto startGame = [this, id, mode, done](const std::filesystem::path& location) {
         launcher_.launch(id.channel, location, mode, [this, done](Result<void> result) { reportLaunch(done, std::move(result)); });
     };
+    if (info->managed) {
+        launcher_.launch(id.channel, info->managedLocation, LaunchMode::LocalGdk, [this, done](Result<void> result) { reportLaunch(done, std::move(result)); });
+        return;
+    }
     if (info->deployed) {
         startGame(info->deployedLocation);
         return;
     }
-    activate(id, keepPackage, [this, done, startGame](Result<std::filesystem::path> result) {
-        if (!result) {
-            reportLaunch(done, std::unexpected(result.error()));
-            return;
-        }
-        startGame(*result);
-    });
 }
 
 Result<void> MinecraftService::setRoot(const paths::Layout& layout) {

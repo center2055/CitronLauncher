@@ -31,15 +31,6 @@ bool openUrl(std::wstring_view url) {
     return result > 32;
 }
 
-bool openFolder(const std::filesystem::path& folder) {
-    std::error_code ec;
-    if (!std::filesystem::is_directory(folder, ec)) {
-        return false;
-    }
-    const auto result = reinterpret_cast<INT_PTR>(ShellExecuteW(nullptr, L"explore", folder.c_str(), nullptr, nullptr, SW_SHOWNORMAL));
-    return result > 32;
-}
-
 std::optional<std::filesystem::path> pickFolder(HWND owner, const std::filesystem::path& initial) {
     IFileOpenDialog* dialog = nullptr;
     if (FAILED(CoCreateInstance(CLSID_FileOpenDialog, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&dialog))) || dialog == nullptr) {

@@ -76,8 +76,8 @@ std::vector<VersionRow> buildRows(const ServiceSnapshot& snapshot, const std::op
         row.id = info.id;
         row.size = info.size();
         row.installed = info.installed();
+        row.downloaded = info.packageFile.has_value() && !info.installed();
         row.deployed = info.deployed;
-        row.deployedByCitron = info.deployedByCitron;
         row.inCatalog = info.catalog.has_value();
         row.partialSize = info.partialSize;
         row.selected = selected && *selected == info.id;

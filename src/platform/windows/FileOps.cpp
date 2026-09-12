@@ -28,6 +28,14 @@ Result<void> moveReplace(const std::filesystem::path& from, const std::filesyste
     return {};
 }
 
+Result<void> moveDirectory(const std::filesystem::path& from, const std::filesystem::path& to) {
+    if (!MoveFileExW(from.c_str(), to.c_str(), MOVEFILE_WRITE_THROUGH)) {
+        return std::unexpected(Error::fromWin32(ErrorCategory::Filesystem, "move directory", GetLastError(),
+                                                "The extracted version could not be moved into place: " + to.string()));
+    }
+    return {};
+}
+
 Result<void> removeFile(const std::filesystem::path& file) {
     if (!DeleteFileW(file.c_str())) {
         const DWORD err = GetLastError();
@@ -35,6 +43,16 @@ Result<void> removeFile(const std::filesystem::path& file) {
             return {};
         }
         return std::unexpected(Error::fromWin32(ErrorCategory::Filesystem, "delete file", err, "The file could not be deleted: " + file.string()));
+    }
+    return {};
+}
+
+Result<void> removeDirectoryTree(const std::filesystem::path& directory) {
+    std::error_code ec;
+    std::filesystem::remove_all(directory, ec);
+    if (ec) {
+        return std::unexpected(Error::fromWin32(ErrorCategory::Filesystem, "delete directory", static_cast<unsigned long>(ec.value()),
+                                                "The version directory could not be deleted: " + directory.string()));
     }
     return {};
 }

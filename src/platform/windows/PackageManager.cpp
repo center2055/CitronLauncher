@@ -105,55 +105,25 @@ std::vector<InstalledPackage> findPackagesByFamily(std::wstring_view familyName)
     return out;
 }
 
-std::optional<InstalledPackage> findPackageByName(std::wstring_view name) {
+std::vector<InstalledPackage> findPackagesByName(std::wstring_view name) {
+    std::vector<InstalledPackage> out;
     try {
         wmd::PackageManager manager;
         for (const auto& package : manager.FindPackagesForUser(L"")) {
             const auto id = package.Id();
             if (text::equalsIgnoreCase(text::toUtf8(std::wstring_view(id.Name())), text::toUtf8(name))) {
-                return describe(package);
+                out.push_back(describe(package));
             }
         }
     } catch (const winrt::hresult_error& e) {
-        log::warn("find package {} failed: 0x{:08X}", text::toUtf8(name), static_cast<unsigned long>(e.code().value));
+        log::warn("find packages by name {} failed: 0x{:08X}", text::toUtf8(name), static_cast<unsigned long>(e.code().value));
     }
-    return std::nullopt;
+    return out;
 }
 
-Result<InstalledPackage> deployPackage(const std::filesystem::path& package, std::stop_token token, const DeployProgress& progress) {
-    const std::string operation = "deploy package";
-    try {
-        wmd::PackageManager manager;
-        const wf::Uri uri(winrt::hstring(package.wstring()));
-        const auto options = wmd::DeploymentOptions::ForceUpdateFromAnyVersion | wmd::DeploymentOptions::ForceApplicationShutdown;
-        auto op = manager.AddPackageAsync(uri, nullptr, options);
-        if (progress) {
-            op.Progress([progress](const auto&, const wmd::DeploymentProgress& p) { progress(static_cast<int>(p.percentage)); });
-        }
-        if (!waitForOperation(op, token)) {
-            if (token.stop_requested()) {
-                return std::unexpected(Error::cancelled(operation));
-            }
-            return std::unexpected(Error::fromHresult(ErrorCategory::Package, operation, op.ErrorCode().value, "Minecraft could not be installed."));
-        }
-        const auto result = op.GetResults();
-        if (auto check = checkResult(result, operation, "Minecraft could not be installed.", token); !check) {
-            return std::unexpected(check.error());
-        }
-        std::string fileName = package.filename().string();
-        if (const auto dot = fileName.rfind('.'); dot != std::string::npos) {
-            fileName.erase(dot);
-        }
-        const auto family = fileName.find('_');
-        std::string name = family != std::string::npos ? fileName.substr(0, family) : fileName;
-        auto installed = findPackageByName(text::toWide(name));
-        if (!installed) {
-            return std::unexpected(Error::make(ErrorCategory::Package, operation, "Minecraft was installed but could not be found afterwards.", fileName, true));
-        }
-        return *installed;
-    } catch (const winrt::hresult_error& e) {
-        return std::unexpected(deploymentError(operation, e, "Minecraft could not be installed."));
-    }
+std::optional<InstalledPackage> findPackageByName(std::wstring_view name) {
+    const auto packages = findPackagesByName(name);
+    return packages.empty() ? std::nullopt : std::optional<InstalledPackage>(packages.front());
 }
 
 Result<void> removePackage(std::wstring_view fullName, std::stop_token token) {

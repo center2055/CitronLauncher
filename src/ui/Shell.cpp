@@ -1,5 +1,7 @@
 #include "ui/Shell.h"
 
+#include "ui/Animation.h"
+
 #include <windows.h>
 
 namespace citron::ui {
@@ -9,9 +11,42 @@ namespace {
 constexpr float kTitleHeight = 52.0f;
 constexpr float kWordmarkHeight = 18.0f;
 
+// cross fades the page that is being switched to, so tab changes are not an
+// instant swap. only one page is visible at a time, so the outgoing page is
+// gone before the incoming one starts fading in.
 class PageHost : public Element {
 public:
     Size measure(const Size& available) override { return available; }
+
+    void render(RenderContext& ctx) override {
+        const Element* showing = nullptr;
+        for (const auto& child : children()) {
+            if (child->visible()) {
+                showing = child.get();
+                break;
+            }
+        }
+        if (showing != current_) {
+            current_ = showing;
+            fade_.jump(0.0f);
+            fade_.set(1.0f);
+        }
+        if (fade_.step(ctx.now) && host_ != nullptr) {
+            host_->requestFrame();
+        }
+        const float opacity = fade_.value();
+        if (opacity >= 0.999f) {
+            Element::render(ctx);
+            return;
+        }
+        ctx.r.pushOpacity(bounds_, opacity);
+        Element::render(ctx);
+        ctx.r.popOpacity();
+    }
+
+private:
+    const Element* current_ = nullptr;
+    Animated fade_{1.0f, 170.0};
 };
 
 }

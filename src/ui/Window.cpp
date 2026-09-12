@@ -116,7 +116,18 @@ void Window::setRoot(Element* root) {
 }
 
 void Window::setTheme(const Theme& theme) {
-    theme_ = theme;
+    // only cross fade once the window is on screen, so the palette picked at
+    // startup is applied instantly instead of fading in on launch
+    themeFrom_ = theme_;
+    themeTo_ = theme;
+    if (hwnd_ != nullptr && firstFrame_) {
+        themeBlend_.jump(0.0f);
+        themeBlend_.set(1.0f);
+        requestFrame();
+    } else {
+        themeBlend_.jump(1.0f);
+        theme_ = theme;
+    }
     const BOOL dark = theme.dark ? TRUE : FALSE;
     if (hwnd_ != nullptr) {
         DwmSetWindowAttribute(hwnd_, DWMWA_USE_IMMERSIVE_DARK_MODE, &dark, sizeof(dark));
@@ -251,6 +262,12 @@ void Window::render() {
             log::error("graphics recovery failed: {}", recovered.error().summary());
             return;
         }
+    }
+    if (themeBlend_.step(now())) {
+        theme_ = mixTheme(themeFrom_, themeTo_, themeBlend_.value());
+        requestFrame();
+    } else {
+        theme_ = themeTo_;
     }
     painting_ = true;
     if (renderer_.beginFrame(theme_.bg)) {

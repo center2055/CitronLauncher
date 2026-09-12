@@ -25,7 +25,6 @@ struct PackageFile {
 struct DeployedPackage {
     VersionId id;
     platform::InstalledPackage package;
-    bool byCitron = false;
 };
 
 struct PartialDownload {
@@ -34,9 +33,10 @@ struct PartialDownload {
     std::uint64_t size = 0;
 };
 
-struct DeployRecord {
-    std::string fullName;
-    std::string version;
+struct ManagedInstallation {
+    VersionId id;
+    std::filesystem::path path;
+    std::uint64_t size = 0;
 };
 
 class VersionManager {
@@ -48,21 +48,23 @@ public:
 
     std::vector<PackageFile> scanPackages() const;
     std::vector<PartialDownload> scanPartials() const;
+    std::vector<ManagedInstallation> scanManagedInstallations() const;
     std::vector<DeployedPackage> scanDeployed() const;
 
     std::filesystem::path packagePath(const VersionId& id) const;
     std::filesystem::path partialPath(const VersionId& id) const;
+    std::filesystem::path managedPath(const VersionId& id) const;
+    std::filesystem::path stagingPath(const VersionId& id) const;
+    bool isCompleteManagedInstallation(const std::filesystem::path& directory) const;
+    Result<void> prepareManagedInstallation(const VersionId& id, const std::filesystem::path& directory, std::stop_token token) const;
+    Result<void> writeManagedMetadata(const VersionId& id, const std::filesystem::path& directory, std::string_view packageMd5) const;
+    void cleanStaging() const;
 
     Catalog loadCatalog(std::string_view embedded) const;
     Result<Catalog> fetchCatalog(std::string_view url, std::stop_token token) const;
 
-    std::map<std::string, DeployRecord> loadDeployRecords() const;
-    void saveDeployRecord(VersionChannel channel, const DeployRecord& record) const;
-    void clearDeployRecord(VersionChannel channel) const;
-
 private:
     std::filesystem::path catalogCachePath() const;
-    std::filesystem::path deployStatePath() const;
 
     paths::Layout layout_;
 };

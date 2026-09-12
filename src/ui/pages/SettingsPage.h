@@ -16,12 +16,11 @@ class SettingsContent;
 
 struct AboutInfo {
     std::wstring version;
-    std::wstring build;
 };
 
 class SettingsPage : public Element {
 public:
-    SettingsPage(PageActions actions, AboutInfo about, std::span<const std::uint8_t> iconPng);
+    SettingsPage(PageActions actions, AboutInfo about);
 
     void update(const AppState& state, const Strings& strings, const std::wstring& rootPath, const std::wstring& installersPath, const std::wstring& logsPath);
 

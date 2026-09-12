@@ -1,20 +1,33 @@
 # Citron Launcher
 
 A small native Windows launcher for Minecraft Bedrock Edition. It lists the
-available game versions, downloads the one you pick, installs it through the
-Windows package manager and starts it. Nothing else.
+available game versions, downloads the one you pick, installs it and starts it.
+Nothing else.
 
 No browser runtime, no managed runtime, no bundled framework. The interface is
-drawn with Direct2D and DirectWrite on a DirectComposition surface, networking
-goes through WinHTTP, package handling goes through the Windows deployment API.
+drawn with Direct2D and DirectWrite on a DirectComposition surface and
+networking goes through WinHTTP.
 
 ## What it does
 
 - Play: shows the selected version and starts it.
 - Versions: the version list with Release and Preview builds, search, filters,
   download progress and removal.
-- Settings: language, close on launch, keep installer files, update checks,
-  the storage folder and build information.
+- Settings: language, close on launch, update checks and the storage folder.
+
+## Screenshots
+
+The version list, with Release and Preview builds, search and filters:
+
+![The Versions page](docs/screenshots/versions.png)
+
+The Play page, showing the version that will start:
+
+![The Play page](docs/screenshots/play.png)
+
+Settings:
+
+![The Settings page](docs/screenshots/settings.png)
 
 ## Requirements
 
@@ -36,15 +49,12 @@ error.
    failure.
 3. The file is verified against the catalog checksum before it is moved to
    `installers\`. A package that fails verification is discarded.
-4. Starting a version that is not the currently installed one for its channel
-   deploys the package through `PackageManager`. Windows keeps one installed
-   package per channel, so the installed build is replaced in place, which
-   keeps worlds and settings and leaves the old build alone if the install
-   fails. Packages kept in `installers\` can be switched back without
-   downloading again. Release and Preview are independent, so a Preview build
-   never touches a Release install.
-5. The game is started with its package identity from the launcher, which
-   skips the store launch helper and its forced update to the newest version.
+4. Installing a downloaded version places it in its own folder under
+   `versions\`, so builds sit side by side. Installing or removing one never
+   touches another, your worlds and settings, or the copy the Microsoft Store
+   manages. Verified packages kept in `installers\` let a version be
+   reinstalled without downloading again. Release and Preview are independent.
+5. The selected version is launched from its own folder.
 
 ## Storage
 
@@ -53,9 +63,10 @@ root is chosen in Settings:
 
 ```text
 settings.json
+versions\     installed versions
 installers\   verified packages
 downloads\    partial transfers
-cache\        version list and deployment records
+cache\        version list
 logs\         rotating log files
 ```
 
@@ -69,7 +80,7 @@ cmake -S . -B build -A x64
 cmake --build build --config Release
 ```
 
-The executable is `build\Release\Citron.exe`. Tests build as `citron_tests`
+The executable is `build\Release\CitronLauncher.exe`. Tests build as `citron_tests`
 and run with `ctest --test-dir build -C Release`.
 
 ## Updating the version list

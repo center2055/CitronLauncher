@@ -39,8 +39,8 @@ struct VersionRow {
     VersionId id;
     std::uint64_t size = 0;
     bool installed = false;
+    bool downloaded = false;
     bool deployed = false;
-    bool deployedByCitron = false;
     bool selected = false;
     bool inCatalog = false;
     std::uint64_t partialSize = 0;

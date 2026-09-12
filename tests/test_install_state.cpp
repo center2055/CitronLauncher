@@ -9,27 +9,38 @@ TEST_CASE(install_stage_transitions) {
     CHECK(canTransition(InstallStage::Resolving, InstallStage::Downloading));
     CHECK(canTransition(InstallStage::Downloading, InstallStage::Verifying));
     CHECK(canTransition(InstallStage::Verifying, InstallStage::Finalizing));
+    CHECK(canTransition(InstallStage::Finalizing, InstallStage::Downloaded));
+    CHECK(canTransition(InstallStage::Verifying, InstallStage::Extracting));
+    CHECK(canTransition(InstallStage::Finalizing, InstallStage::Extracting));
+    CHECK(canTransition(InstallStage::Extracting, InstallStage::Completed));
     CHECK(canTransition(InstallStage::Finalizing, InstallStage::Completed));
-    CHECK(canTransition(InstallStage::Idle, InstallStage::Deploying));
-    CHECK(canTransition(InstallStage::Deploying, InstallStage::Completed));
+    CHECK(canTransition(InstallStage::Downloaded, InstallStage::Idle));
     CHECK(canTransition(InstallStage::Downloading, InstallStage::Cancelled));
-    CHECK(canTransition(InstallStage::Deploying, InstallStage::Failed));
+    CHECK(canTransition(InstallStage::Extracting, InstallStage::Failed));
     CHECK(!canTransition(InstallStage::Idle, InstallStage::Completed));
     CHECK(!canTransition(InstallStage::Idle, InstallStage::Failed));
     CHECK(!canTransition(InstallStage::Downloading, InstallStage::Completed));
     CHECK(!canTransition(InstallStage::Completed, InstallStage::Downloading));
     CHECK(canTransition(InstallStage::Failed, InstallStage::Idle));
     CHECK(!canTransition(InstallStage::Verifying, InstallStage::Verifying));
+    CHECK(canTransition(InstallStage::Idle, InstallStage::Removing));
+    CHECK(canTransition(InstallStage::Removing, InstallStage::Idle));
+    CHECK(canTransition(InstallStage::Removing, InstallStage::Failed));
+    CHECK(!canTransition(InstallStage::Removing, InstallStage::Completed));
 }
 
 TEST_CASE(install_stage_flags) {
     CHECK(isTerminal(InstallStage::Completed));
     CHECK(isTerminal(InstallStage::Failed));
     CHECK(isTerminal(InstallStage::Cancelled));
+    CHECK(isTerminal(InstallStage::Downloaded));
     CHECK(!isTerminal(InstallStage::Downloading));
     CHECK(isBusy(InstallStage::Downloading));
     CHECK(!isBusy(InstallStage::Idle));
     CHECK(!isBusy(InstallStage::Completed));
+    CHECK(!isBusy(InstallStage::Downloaded));
+    CHECK(isBusy(InstallStage::Removing));
+    CHECK(!isTerminal(InstallStage::Removing));
 }
 
 TEST_CASE(install_progress_fraction) {

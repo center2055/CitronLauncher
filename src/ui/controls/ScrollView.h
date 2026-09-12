@@ -29,9 +29,11 @@ public:
 private:
     float maxOffset() const;
     Rect thumbRect() const;
+    void applyOffset();
 
     Element* content_ = nullptr;
     float offset_ = 0.0f;
+    Animated scroll_{0.0f, 160.0};
     float contentHeight_ = 0.0f;
     float padLeft_ = 0.0f, padTop_ = 0.0f, padRight_ = 0.0f, padBottom_ = 0.0f;
     bool dragging_ = false;

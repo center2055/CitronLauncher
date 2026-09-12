@@ -28,13 +28,15 @@ struct VersionInfo {
     std::optional<CatalogEntry> catalog;
     std::optional<std::filesystem::path> packageFile;
     std::uint64_t packageSize = 0;
+    bool managed = false;
+    std::filesystem::path managedLocation;
+    std::uint64_t managedSize = 0;
     bool deployed = false;
-    bool deployedByCitron = false;
     std::wstring deployedFullName;
     std::filesystem::path deployedLocation;
     std::uint64_t partialSize = 0;
 
-    bool installed() const { return packageFile.has_value() || deployed; }
+    bool installed() const { return managed || deployed; }
     std::uint64_t size() const;
 };
 
@@ -66,8 +68,7 @@ public:
     void cancel(const VersionId& id);
     void dismiss(const VersionId& id);
     void remove(const VersionId& id, std::function<void(Result<void>)> done);
-    void activate(const VersionId& id, bool keepPackage, std::function<void(Result<std::filesystem::path>)> done);
-    void launch(const VersionId& id, bool keepPackage, std::function<void(Result<void>)> done);
+    void launch(const VersionId& id, std::function<void(Result<void>)> done);
     bool busy(const VersionId& id) const;
     bool anyBusy() const;
 
@@ -81,6 +82,8 @@ private:
     void rebuild();
     void notify();
     void updateOperation(const VersionId& id, const InstallProgress& progress);
+    void clearOperation(const VersionId& id);
+    bool removing(const VersionId& id) const;
     void reportLaunch(std::function<void(Result<void>)> done, Result<void> result);
 
     TaskScheduler& scheduler_;
@@ -96,6 +99,7 @@ private:
     Catalog catalog_;
     std::vector<PackageFile> packages_;
     std::vector<PartialDownload> partials_;
+    std::vector<ManagedInstallation> managed_;
     std::vector<DeployedPackage> deployed_;
     ServiceSnapshot snapshot_;
     std::function<void()> changeHandler_;

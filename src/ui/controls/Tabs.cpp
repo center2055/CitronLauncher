@@ -8,7 +8,13 @@ void Tabs::setSelected(int index) {
     if (index != selected_ && index >= 0 && index < static_cast<int>(labels_.size())) {
         selected_ = index;
         focusIndex_ = index;
+        for (size_t i = 0; i < active_.size(); ++i) {
+            active_[i].set(static_cast<int>(i) == selected_ ? 1.0f : 0.0f);
+        }
         invalidate();
+        if (host_ != nullptr) {
+            host_->requestFrame();
+        }
     }
 }
 
@@ -63,7 +69,21 @@ int Tabs::indexAt(Point point) const {
 
 void Tabs::render(RenderContext& ctx) {
     const Theme& t = ctx.theme;
-    const float pad = kind_ == TabsKind::Navigation ? 16.0f : 0.0f;
+    if (active_.size() != labels_.size()) {
+        active_.assign(labels_.size(), Animated(0.0f, 170.0));
+        if (selected_ >= 0 && selected_ < static_cast<int>(active_.size())) {
+            active_[static_cast<size_t>(selected_)].jump(1.0f);
+        }
+    }
+    bool animating = false;
+    for (auto& a : active_) {
+        if (a.step(ctx.now)) {
+            animating = true;
+        }
+    }
+    if (animating && host_ != nullptr) {
+        host_->requestFrame();
+    }
     for (size_t i = 0; i < rects_.size() && i < labels_.size(); ++i) {
         const Rect& r = rects_[i];
         const bool active = static_cast<int>(i) == selected_;
@@ -71,11 +91,8 @@ void Tabs::render(RenderContext& ctx) {
         if (hover && !active && kind_ == TabsKind::Navigation) {
             ctx.r.fillRect(r, t.dark ? Color::white(0.03f) : Color::black(0.03f));
         }
-        const Color color = active || hover ? t.textHi : t.textDim;
+        const Color color = hover ? t.textHi : mix(t.textDim, t.textHi, active_[i].value());
         ctx.r.drawText(labels_[i], style(), r, color, {Align::Center, Align::Center, false, false});
-        if (active) {
-            ctx.r.fillRect({r.x + pad, r.bottom() - 1.0f, r.w - pad * 2.0f, 2.0f}, t.accent);
-        }
         if (focused() && host_->keyboardFocusVisible() && static_cast<int>(i) == focusIndex_) {
             ctx.r.strokeRect(r.inset(2.0f), t.textHi, 2.0f, 4.0f);
         }

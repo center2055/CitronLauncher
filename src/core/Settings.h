@@ -12,7 +12,6 @@ struct Settings {
     std::string language = "en";
     std::string theme = "dark";
     bool closeOnLaunch = true;
-    bool keepInstallers = true;
     bool checkUpdates = true;
     std::string selectedVersion;
     std::string rootDirectory;
