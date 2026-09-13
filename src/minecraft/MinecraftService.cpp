@@ -147,13 +147,27 @@ void MinecraftService::start(std::string_view catalogUrl) {
         catalog_ = versions_.loadCatalog(embeddedCatalog_);
         packages_ = versions_.scanPackages();
         partials_ = versions_.scanPartials();
-        versions_.cleanStaging();
         managed_ = versions_.scanManagedInstallations();
         rebuild();
         log::info("catalog ready: {} versions, {} isolated installs, {} package caches, {} partial downloads", catalog_.entries.size(), managed_.size(), packages_.size(), partials_.size());
     }
     notify();
-    refreshInstalled();
+    // Clearing stale staging leftovers deletes an interrupted extract, which is
+    // tens of thousands of files. This used to run inline here, on the UI thread
+    // and under the lock, so the window stayed black for as long as the delete
+    // took and the launcher looked hung on the first start after a cancelled
+    // install. It runs on a worker now and the installed list is rescanned once
+    // it finishes.
+    scheduler_.run([this](std::stop_token) {
+        platform::initializeApartment();
+        const auto started = log::elapsedMs();
+        versions_.cleanStaging();
+        const auto elapsed = log::elapsedMs() - started;
+        if (elapsed > 250.0) {
+            log::info("cleared stale staging directories in {:.0f} ms", elapsed);
+        }
+        refreshInstalled();
+    });
     refreshCatalog(catalogUrl);
     checkEnvironment();
 }
