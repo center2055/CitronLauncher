@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.28)
 
-project(CitronLauncher VERSION 0.1.0 LANGUAGES CXX RC)
+project(CitronLauncher VERSION 0.1.1 LANGUAGES CXX RC)
 
 if(NOT WIN32 OR NOT MSVC)
     message(FATAL_ERROR "Citron Launcher targets Windows x64 with MSVC")
